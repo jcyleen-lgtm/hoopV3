@@ -6,7 +6,7 @@ import ChartCard from './components/ChartCard';
 import RankCard  from './components/RankCard';
 import FilterBar from './components/FilterBar';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrk91DSCO3exG4DzaS4BpNdX_sQvQT04o8LowrjnU/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxH61RwntWOKccbZ2Y24OpD3pN4ya5Rh_Law1955LvMvq_Mns3lT8LINGFXs3mCB06h/exec';
 
 const MONTH_NAMES = [
   'January','February','March','April','May','June',

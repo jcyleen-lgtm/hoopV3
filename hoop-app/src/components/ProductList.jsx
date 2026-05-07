@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { NAVY, RADIUS, TYPE, FONT } from '../theme';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrk91DSCO3exG4DzaS4BpNdX_sQvQT04o8LowrjnU/dev';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxH61RwntWOKccbZ2Y24OpD3pN4ya5Rh_Law1955LvMvq_Mns3lT8LINGFXs3mCB06h/exec';
 const BORDER_STOPS = [NAVY[700], NAVY[600], NAVY[500], NAVY[400], NAVY[300]];
 
 // Inline SVG icons

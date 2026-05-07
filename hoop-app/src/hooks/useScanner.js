@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import axios from 'axios';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrk91DSCO3exG4DzaS4BpNdX_sQvQT04o8LowrjnU/dev';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxH61RwntWOKccbZ2Y24OpD3pN4ya5Rh_Law1955LvMvq_Mns3lT8LINGFXs3mCB06h/exec';
 const MAX_HISTORY = 10;
 
 export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
