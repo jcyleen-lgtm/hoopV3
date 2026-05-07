@@ -13,6 +13,7 @@ export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
 
   const isProcessing = useRef(false);
   const scannerRef   = useRef(null);
+  const resetTimer   = useRef(null);
 
   const sendScanData = useCallback(async (labelId) => {
     if (!user || isProcessing.current) return;
@@ -23,14 +24,13 @@ export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
     setLastScan(trimmed);
     setStatus('SAVING...');
 
+    // Clear any pending reset
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+
     try {
       const response = await axios.get(SCRIPT_URL, {
-        params: {
-          action:   'saveScan',
-          labelId:  trimmed,
-          username: user.name,
-          cam:      cam || '',
-        }
+        params: { action: 'saveScan', labelId: trimmed, username: user.name, cam: cam || '' },
+        timeout: 12000,
       });
 
       const res = response.data;
@@ -44,7 +44,7 @@ export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
           ...prev.slice(0, MAX_HISTORY - 1),
         ]);
       } else if (res?.status === 'duplicate') {
-        nextStatus = 'DOUBLE SCAN!';
+        nextStatus = 'DUPLICATE!';
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
       }
 
@@ -53,11 +53,11 @@ export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
       console.error('Scan Error:', err);
       setStatus('ERROR!');
     } finally {
-      setTimeout(() => {
+      resetTimer.current = setTimeout(() => {
         setStatus('READY');
         setLastScan('');
         isProcessing.current = false;
-      }, 2500);
+      }, 1500); // faster reset
     }
   }, [user, cam]);
 
@@ -71,7 +71,7 @@ export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
         scannerRef.current = html5QrCode;
         await html5QrCode.start(
           { facingMode: 'environment' },
-          { fps: 12, qrbox: { width: 300, height: 100 } },
+          { fps: 15, qrbox: { width: 280, height: 80 } },
           (text) => { if (text.trim()) sendScanData(text.trim()); }
         );
         setCameraError(null);
@@ -81,7 +81,7 @@ export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
       }
     };
 
-    const timer = setTimeout(startCamera, 500);
+    const timer = setTimeout(startCamera, 300);
     return () => {
       clearTimeout(timer);
       if (scannerRef.current) {

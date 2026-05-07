@@ -62,7 +62,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
   // Fetch available month sheets on mount
   useEffect(() => {
-    axios.get(SCRIPT_URL, { params: { action: 'getMonths' } })
+    axios.get(SCRIPT_URL, { params: { action: 'getMonths' }, timeout: 12000 })
       .then(r => { if (r.data?.months) setAvail(r.data.months); })
       .catch(() => {});
   }, []);
@@ -76,7 +76,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
         : filterMode === 'custom' ? 'custom' : activeQuick;
 
       const response = await axios.get(SCRIPT_URL, {
-        params: { action: 'getRekapan', type, start: dateRange.start, end: dateRange.end }
+        params: { action: 'getRekapan', type, start: dateRange.start, end: dateRange.end }, timeout: 15000
       });
       const res = response.data;
 
