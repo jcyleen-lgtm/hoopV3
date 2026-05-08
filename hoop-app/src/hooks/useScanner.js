@@ -71,7 +71,7 @@ export const useScanner = ({ user, cam, active, mode = 'camera' }) => {
         scannerRef.current = html5QrCode;
         await html5QrCode.start(
           { facingMode: 'environment' },
-          { fps: 15, qrbox: { width: 280, height: 80 } },
+          { fps: 20, qrbox: { width: 320, height: 160 } },
           (text) => { if (text.trim()) sendScanData(text.trim()); }
         );
         setCameraError(null);

@@ -125,14 +125,16 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
     height: '60px',
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: isDesktop ? '0 36px' : '0 16px',
-    backgroundColor: colors.card,
-    borderBottom: `1px solid ${colors.border}`,
+    background: 'rgba(9, 18, 30, 0.75)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    borderBottom: '1px solid rgba(255,255,255,0.07)',
     position: 'sticky', top: 0, zIndex: 100,
   }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <div style={{
         width: '32px', height: '32px', borderRadius: RADIUS.sm,
-        background: NAVY[900],
+        background: 'linear-gradient(135deg, #1E3A5F 0%, #3B82C4 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
@@ -141,7 +143,7 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
           <path d="M2 12l10 5 10-5"/>
         </svg>
       </div>
-      <span style={{ fontSize: TYPE.md, fontWeight: '800', color: colors.text }}>HoopV3</span>
+      <span style={{ fontSize: TYPE.md, fontWeight: '800', color: '#fff', letterSpacing: '-0.3px' }}>HoopV3</span>
     </div>
 
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -169,6 +171,8 @@ const GlobalStyles = ({ colors }) => (
       -webkit-font-smoothing: antialiased;
     }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    #reader video { border-radius: 12px !important; }
+    #reader { overflow: hidden !important; }
     .spin { animation: spin 1s linear infinite; }
     @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   `}</style>
