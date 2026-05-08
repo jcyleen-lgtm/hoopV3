@@ -51,7 +51,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: colors.bg, color: colors.text, fontFamily: FONT }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: colors.bgGrad || colors.bg, color: colors.text, fontFamily: FONT }}>
       <GlobalStyles colors={colors} />
 
       {/* Sidebar - Desktop Only */}
@@ -152,7 +152,7 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
       )}
       <button
         onClick={onToggleTheme}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.text, display: 'flex', alignItems: 'center' }}
+        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(91,155,213,0.2)', borderRadius: '50%', width: '34px', height: '34px', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
         {theme === 'light' ? <MoonIcon /> : <SunIcon />}
       </button>
@@ -166,10 +166,12 @@ const GlobalStyles = ({ colors }) => (
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: ${colors.bg};
+      background: ${colors.bgGrad || colors.bg};
       font-family: 'Inter', sans-serif;
       -webkit-font-smoothing: antialiased;
     }
+    #reader video { border-radius: 14px !important; object-fit: cover; }
+    #reader { border-radius: 14px !important; overflow: hidden !important; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     #reader video { border-radius: 12px !important; }
     #reader { overflow: hidden !important; }

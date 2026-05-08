@@ -1,77 +1,63 @@
 export const NAVY = {
-  950: '#060D18',
-  900: '#0F1923',
-  800: '#1E3A5F',
-  700: '#2D5A8E',
-  600: '#3B82C4',
-  500: '#5B9BD5',
-  400: '#85B7E8',
-  300: '#B5D4F4',
-  100: '#DFF0FC',
-  50:  '#EBF3FC',
+  950: '#020810',
+  900: '#050E1C',
+  800: '#0A1929',
+  700: '#0D2137',
+  600: '#112845',
+  500: '#1A3A5C',
+  400: '#2D5A8E',
+  300: '#3B82C4',
+  200: '#5B9BD5',
+  100: '#85B7E8',
+  50:  '#B5D4F4',
 };
 
-// Alias kept for components that import BLUE
-export const BLUE = {
-  50:  NAVY[50],
-  100: NAVY[100],
-  200: NAVY[300],
-  400: NAVY[600],
-  500: NAVY[700],
-  600: NAVY[800],
-  700: NAVY[800],
-  800: NAVY[900],
-  900: NAVY[950],
+export const BLUE = NAVY;
+
+export const GLASS = {
+  card:    'rgba(13, 33, 55, 0.55)',
+  surface: 'rgba(10, 25, 41, 0.70)',
+  input:   'rgba(5, 14, 28, 0.60)',
+  border:  'rgba(91, 155, 213, 0.15)',
+  borderHi:'rgba(91, 155, 213, 0.35)',
+  blur:    'blur(20px)',
 };
 
 export const makeColors = (theme) => {
-  const dark = theme === 'dark';
+  // Always dark — glass morphism is inherently dark
   return {
-    // Page backgrounds
-    bg:       dark ? '#080F1A' : '#F0F2F5',
-    card:     dark ? '#111E2E' : '#FFFFFF',
-    surface:  dark ? '#172538' : NAVY[50],
-
-    // Sidebar (always dark)
-    sidebar:  NAVY[900],
-
-    // Brand
-    brand:    NAVY[600],
-    brandDark:NAVY[800],
-
-    // Text
-    text:     dark ? '#E8EFF8' : NAVY[900],
-    subText:  dark ? NAVY[300] : '#6B7280',
-    onDark:   '#FFFFFF',
-    onBrand:  '#FFFFFF',
-
-    // Borders
-    border:    dark ? 'rgba(181,212,244,0.10)' : '#EAECF0',
-    borderMid: dark ? 'rgba(181,212,244,0.20)' : '#D1D5DB',
-
-    // Semantic
-    success: '#22C55E',
-    warning: '#F59E0B',
-    error:   '#EF4444',
-    info:    NAVY[600],
-
-    theme,
+    bg:        '#030B18',
+    bgGrad:    'radial-gradient(ellipse at 20% 0%, #0D2137 0%, #030B18 60%)',
+    card:      GLASS.card,
+    surface:   GLASS.surface,
+    border:    GLASS.border,
+    borderMid: GLASS.borderHi,
+    sidebar:   'rgba(5, 14, 28, 0.85)',
+    brand:     '#3B82C4',
+    brandDark: '#0D2137',
+    text:      '#E8F0FA',
+    subText:   'rgba(181, 212, 244, 0.55)',
+    onDark:    '#FFFFFF',
+    onBrand:   '#FFFFFF',
+    success:   '#22C55E',
+    warning:   '#F59E0B',
+    error:     '#EF4444',
+    info:      '#3B82C4',
+    theme:     'dark',
   };
 };
 
 export const STATUS_CONFIG = {
-  'READY':             { label: 'Ready',       color: '#F59E0B', icon: 'Clock'         },
-  'SAVING...':         { label: 'Saving…',     color: NAVY[600], icon: 'Loader'        },
-  'SUCCESS!':          { label: 'Success',      color: '#22C55E', icon: 'CheckCircle'   },
-  'DOUBLE SCAN!':      { label: 'Double scan',  color: '#F59E0B', icon: 'AlertTriangle' },
-  'ERROR!':            { label: 'Error',        color: '#EF4444', icon: 'XCircle'       },
-  'GAGAL!':            { label: 'Failed',       color: '#EF4444', icon: 'XCircle'       },
-  'LOADING...':        { label: 'Loading…',     color: NAVY[600], icon: 'Loader'        },
-  'AUTHENTICATING...': { label: 'Signing in…',  color: NAVY[600], icon: 'Loader'        },
+  'READY':      { label: 'Siap Scan',  color: '#F59E0B', icon: 'Clock',         bg: 'rgba(245,158,11,0.12)'  },
+  'SAVING...':  { label: 'Menyimpan…', color: '#5B9BD5', icon: 'Loader',        bg: 'rgba(91,155,213,0.12)'  },
+  'SUCCESS!':   { label: 'Berhasil!',  color: '#22C55E', icon: 'CheckCircle',   bg: 'rgba(34,197,94,0.12)'   },
+  'DUPLICATE!': { label: 'Duplicate!', color: '#F59E0B', icon: 'AlertTriangle', bg: 'rgba(245,158,11,0.12)'  },
+  'ERROR!':     { label: 'Error',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.12)'   },
+  'GAGAL!':     { label: 'Gagal',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.12)'   },
 };
 
 export const getStatusConfig = (s) =>
-  STATUS_CONFIG[s] ?? { label: s, color: '#EF4444', icon: 'AlertCircle' };
+  STATUS_CONFIG[s] ?? { label: s, color: '#EF4444', icon: 'AlertCircle', bg: 'rgba(239,68,68,0.12)' };
 
 export const TYPE = {
   xs:   '11px',
@@ -83,10 +69,10 @@ export const TYPE = {
 };
 
 export const RADIUS = {
-  sm:   '8px',
-  md:   '12px',
-  lg:   '16px',
-  xl:   '24px',
+  sm:   '10px',
+  md:   '14px',
+  lg:   '20px',
+  xl:   '28px',
   pill: '999px',
 };
 

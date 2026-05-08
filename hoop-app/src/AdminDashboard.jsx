@@ -6,7 +6,7 @@ import ChartCard from './components/ChartCard';
 import RankCard  from './components/RankCard';
 import FilterBar from './components/FilterBar';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxH61RwntWOKccbZ2Y24OpD3pN4ya5Rh_Law1955LvMvq_Mns3lT8LINGFXs3mCB06h/exec';
+const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL;
 
 const MONTH_NAMES = [
   'January','February','March','April','May','June',
@@ -95,6 +95,11 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
   }, [filterMode, activeQuick, selectedMonth, dateRange]);
 
   useEffect(() => { fetchData(); }, [activeQuick, selectedMonth, fetchData]);
+
+  // Trigger fetch when filterMode changes to month
+  useEffect(() => {
+    if (filterMode === 'month' && selectedMonth) fetchData();
+  }, [filterMode, selectedMonth]);
 
   const dateInpStyle = {
     height: '34px', padding: '0 12px',
