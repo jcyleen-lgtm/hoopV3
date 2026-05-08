@@ -115,14 +115,14 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
   };
 
   return (
-    <div style={{ backgroundColor: colors.bg, minHeight: '100vh', fontFamily: FONT }}>
+    <div style={{ background: 'transparent', fontFamily: FONT }}>
 
       {/* Header */}
       <div style={{
         padding: isDesktop ? '20px 36px' : '14px 18px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         borderBottom: `1px solid ${colors.border}`,
-        background: colors.card,
+        background: 'rgba(5,14,28,0.6)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
       }}>
         <div>
           <h1 style={{ fontSize: TYPE.xl, fontWeight: '800', color: colors.text, margin: 0, letterSpacing: '-0.3px' }}>

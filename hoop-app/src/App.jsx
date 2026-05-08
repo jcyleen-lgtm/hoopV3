@@ -30,7 +30,7 @@ function App() {
     if (!username || !password) return alert('Isi Username dan Password!');
     setAuthLoading(true);
     try {
-      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrk91DSCO3exG4DzaS4BpNdX_sQvQT04o8LowrjnU/dev';
+      const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL;
       const response = await fetch(
         `${SCRIPT_URL}?action=login&user=${encodeURIComponent(username)}&pass=${encodeURIComponent(password)}`
       );
