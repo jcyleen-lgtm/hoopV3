@@ -6,200 +6,251 @@ import ChartCard from './components/ChartCard';
 import RankCard  from './components/RankCard';
 import FilterBar from './components/FilterBar';
 
-
-const MONTH_NAMES = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December',
-];
-
 const QUICK = [
-  { value: 'today',     label: 'Hari ini'    },
-  { value: 'yesterday', label: 'Kemarin'     },
-  { value: 'monthly',   label: 'Bulan ini'   },
-  { value: 'custom',    label: 'Custom'      },
+  { value: 'today',     label: 'Hari ini'  },
+  { value: 'yesterday', label: 'Kemarin'   },
+  { value: 'monthly',   label: 'Bulan ini' },
+  { value: 'custom',    label: 'Custom'    },
 ];
 
-// SVG icons
-const RefreshIcon = ({ size = 18, color = 'currentColor', className }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+// ── Skeleton shimmer ──────────────────────────────────────────
+const Shimmer = ({ w = '100%', h = '18px', r = '8px' }) => (
+  <div style={{
+    width:w, height:h, borderRadius:r,
+    background:'linear-gradient(90deg,rgba(91,155,213,0.07) 25%,rgba(91,155,213,0.15) 50%,rgba(91,155,213,0.07) 75%)',
+    backgroundSize:'200% 100%',
+    animation:'shimmer 1.4s infinite',
+  }} />
+);
+
+const SkeletonDashboard = ({ isDesktop, colors }) => (
+  <>
+    <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
+    <div style={{ display:'grid', gridTemplateColumns:isDesktop?'repeat(3,1fr)':'repeat(2,1fr)', gap:'14px', marginBottom:'20px' }}>
+      {[1,2,isDesktop?3:null].filter(Boolean).map(i => (
+        <div key={i} style={{ background:colors.card, border:`1px solid ${colors.border}`, borderRadius:RADIUS.lg, padding:'20px' }}>
+          <Shimmer h="12px" w="55%" /><div style={{marginTop:'10px'}}/>
+          <Shimmer h="30px" w="40%" r="6px" /><div style={{marginTop:'8px'}}/>
+          <Shimmer h="10px" w="25%" />
+        </div>
+      ))}
+    </div>
+    <div style={{ display:isDesktop?'grid':'flex', flexDirection:'column', gridTemplateColumns:'1.3fr 0.7fr', gap:'20px' }}>
+      <div style={{ background:colors.card, border:`1px solid ${colors.border}`, borderRadius:RADIUS.lg, padding:'20px', minHeight:'280px' }}>
+        <Shimmer h="12px" w="40%" />
+        <div style={{ margin:'28px auto', width:'180px', height:'180px', borderRadius:'50%', border:'30px solid rgba(91,155,213,0.07)' }} />
+      </div>
+      <div style={{ background:colors.card, border:`1px solid ${colors.border}`, borderRadius:RADIUS.lg, padding:'20px' }}>
+        <Shimmer h="12px" w="50%" />
+        {[1,2,3,4,5].map(i => (
+          <div key={i} style={{ display:'flex', gap:'10px', alignItems:'center', marginTop:'14px' }}>
+            <div style={{ width:'28px', height:'28px', borderRadius:'8px', background:'rgba(91,155,213,0.1)' }} />
+            <div style={{ flex:1 }}><Shimmer h="12px" /><div style={{marginTop:'6px'}}><Shimmer h="3px" /></div></div>
+            <Shimmer h="14px" w="28px" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </>
+);
+
+// ── Icons ─────────────────────────────────────────────────────
+const RefreshIcon = ({ size=18, color='currentColor', spinning }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+    style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }}>
     <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
   </svg>
 );
-const AlertIcon = ({ size = 40, color = '#EF4444' }) => (
+const AlertIcon = ({ size=40, color='#EF4444' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
   </svg>
 );
 
+// ── Main Component ────────────────────────────────────────────
 const AdminDashboard = ({ user, isDesktop, theme }) => {
-  const colors  = makeColors(theme || 'light');
+  const colors  = makeColors(theme || 'dark');
   const isAdmin = user?.role === 'Admin' || user?.role === 'admin';
 
-  const [rows, setRows]       = useState([]);
-  const [meta, setMeta]       = useState({ totalScan: 0, staffCount: 0 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(false);
+  const [rows, setRows]         = useState([]);
+  const [meta, setMeta]         = useState({ totalScan:0, staffCount:0 });
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(false);
   const [availMonths, setAvail] = useState([]);
 
-  const [filterMode, setFilterMode]   = useState('quick');
-  const [activeQuick, setActiveQuick] = useState('today');
-  const [selectedMonth, setSelMonth]  = useState('');
-  const [dateRange, setDateRange]     = useState({ start: '', end: '' });
+  const [filterMode, setFilterMode]       = useState('quick');
+  const [activeQuick, setActiveQuick]     = useState('today');
+  const [selectedMonth, setSelMonth]      = useState('');
+  const [dateRange, setDateRange]         = useState({ start:'', end:'' });
   const [showMonthMenu, setShowMonthMenu] = useState(false);
-  const [exportOpen, setExportOpen]   = useState(false);
 
-  const exportRef    = useRef(null);
-  const monthMenuRef = useRef(null);
-  const cache        = useRef({});
+  const cache = useRef({});
 
-  const barColor  = (i) => ['#3B82C4','#2D5A8E','#1E3A5F','#5B9BD5','#85B7E8'][Math.min(i, 4)];
+  const barColor  = (i) => ['#3B82C4','#2D5A8E','#1E3A5F','#5B9BD5','#85B7E8'][Math.min(i,4)];
   const rankStyle = (i) => {
-    if (i === 0) return { bg: '#D4AF37', color: '#fff' };
-    if (i === 1) return { bg: '#9EA7B1', color: '#fff' };
-    if (i === 2) return { bg: '#C17F3D', color: '#fff' };
-    return { bg: colors.surface, color: colors.text };
+    if (i===0) return { bg:'#D4AF37', color:'#fff' };
+    if (i===1) return { bg:'#9EA7B1', color:'#fff' };
+    if (i===2) return { bg:'#C17F3D', color:'#fff' };
+    return { bg:colors.surface, color:colors.text };
   };
 
-  // Fetch available month sheets on mount
+  // Load available month sheets sekali saat mount
   useEffect(() => {
-    callScript({ action: 'getMonths' })
-      .then(r => { 
-        console.log('getMonths response:', r);
-        if (r?.months) setAvail(r.months);
-        else console.warn('No months in response:', r);
-      })
-      .catch(err => console.error('getMonths error:', err));
+    callScript({ action:'getMonths' })
+      .then(r => { if (r?.months) setAvail(r.months); })
+      .catch(() => {});
   }, []);
 
-  const fetchData = useCallback(async () => {
-    // Cache key
-    const cacheKey = filterMode === 'month' ? selectedMonth : filterMode === 'custom' ? `${dateRange.start}_${dateRange.end}` : activeQuick;
+  const fetchData = useCallback(async (overrideMode, overrideRange) => {
+    const mode  = overrideMode  ?? filterMode;
+    const range = overrideRange ?? dateRange;
+
+    const cacheKey = mode === 'month'
+      ? `month_${selectedMonth}`
+      : mode === 'custom'
+        ? `custom_${range.start}_${range.end}`
+        : `quick_${activeQuick}`;
+
+    // Langsung dari cache — tidak perlu loading
     if (cache.current[cacheKey]) {
-      const cached = cache.current[cacheKey];
-      setRows(cached.data); setMeta({ totalScan: cached.totalScan, staffCount: cached.staffCount });
-      setLoading(false); return;
+      const c = cache.current[cacheKey];
+      setRows(c.data);
+      setMeta({ totalScan:c.totalScan, staffCount:c.staffCount });
+      setLoading(false);
+      setError(false);
+      return;
     }
+
     setLoading(true);
     setError(false);
-    try {
-      const type = filterMode === 'month'
-        ? selectedMonth
-        : filterMode === 'custom' ? 'custom' : activeQuick;
 
-      const res = await callScript({ action: 'getRekapan', type, start: dateRange.start, end: dateRange.end });
+    try {
+      const type = mode === 'month'
+        ? selectedMonth
+        : mode === 'custom' ? 'custom' : activeQuick;
+
+      const res = await callScript({
+        action:'getRekapan', type,
+        start: range.start, end: range.end,
+      });
 
       if (res?.status === 'success') {
-        setRows(res.data || []);
-        setMeta({ totalScan: res.totalScan ?? 0, staffCount: res.staffCount ?? 0 });
         cache.current[cacheKey] = res;
+        setRows(res.data || []);
+        setMeta({ totalScan:res.totalScan??0, staffCount:res.staffCount??0 });
       } else {
         setError(true);
       }
-    } catch (err) {
-      console.error('Fetch error:', err);
+    } catch {
       setError(true);
     } finally {
       setLoading(false);
     }
   }, [filterMode, activeQuick, selectedMonth, dateRange]);
 
-  useEffect(() => { fetchData(); }, [activeQuick, selectedMonth, fetchData]);
+  // Fetch saat quick filter berubah
+  useEffect(() => {
+    if (filterMode === 'quick') fetchData();
+  }, [activeQuick]); // eslint-disable-line
 
-  // Trigger fetch when filterMode changes to month
+  // Fetch saat bulan dipilih
   useEffect(() => {
     if (filterMode === 'month' && selectedMonth) fetchData();
-  }, [filterMode, selectedMonth]);
+  }, [selectedMonth, filterMode]); // eslint-disable-line
 
-  const dateInpStyle = {
-    height: '34px', padding: '0 12px',
-    backgroundColor: colors.surface, border: `1px solid ${colors.border}`,
-    borderRadius: RADIUS.sm, fontSize: TYPE.sm, color: colors.text,
-    outline: 'none', fontFamily: FONT,
-  };
-  const navyBtnStyle = {
-    height: '34px', padding: '0 16px',
-    backgroundColor: NAVY[700], color: '#fff',
-    border: 'none', borderRadius: RADIUS.sm,
-    fontSize: TYPE.sm, fontWeight: '600', cursor: 'pointer', fontFamily: FONT,
+  // Manual refresh — hapus cache entry aktif dulu
+  const handleRefresh = () => {
+    const cacheKey = filterMode === 'month'
+      ? `month_${selectedMonth}`
+      : filterMode === 'custom'
+        ? `custom_${dateRange.start}_${dateRange.end}`
+        : `quick_${activeQuick}`;
+    delete cache.current[cacheKey];
+    fetchData();
   };
 
   return (
-    <div style={{ background: 'transparent', fontFamily: FONT }}>
+    <div style={{ background:'transparent', fontFamily:FONT }}>
+      <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
       <div style={{
         padding: isDesktop ? '20px 36px' : '14px 18px',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderBottom: `1px solid ${colors.border}`,
-        background: 'rgba(5,14,28,0.6)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+        display:'flex', justifyContent:'space-between', alignItems:'center',
+        borderBottom:`1px solid ${colors.border}`,
+        background:'rgba(5,14,28,0.6)',
+        backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
       }}>
         <div>
-          <h1 style={{ fontSize: TYPE.xl, fontWeight: '800', color: colors.text, margin: 0, letterSpacing: '-0.3px' }}>
+          <h1 style={{ fontSize:TYPE.xl, fontWeight:'800', color:colors.text, margin:0, letterSpacing:'-0.3px' }}>
             Dashboard
           </h1>
-          <p style={{ fontSize: TYPE.xs, color: colors.subText, margin: '2px 0 0', letterSpacing: '0.04em' }}>
+          <p style={{ fontSize:TYPE.xs, color:colors.subText, margin:'2px 0 0', letterSpacing:'0.04em' }}>
             WAREHOUSE PERFORMANCE ANALYTICS
           </p>
         </div>
-        <button
-          onClick={fetchData} disabled={loading}
-          style={{
-            background: colors.surface, border: `1px solid ${colors.border}`,
-            borderRadius: RADIUS.sm, padding: '8px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center',
-          }}
-        >
-          <RefreshIcon size={18} color={colors.text} className={loading ? 'spin' : ''} />
+        <button onClick={handleRefresh} disabled={loading} style={{
+          background:colors.surface, border:`1px solid ${colors.border}`,
+          borderRadius:RADIUS.sm, padding:'8px', cursor:'pointer',
+          display:'flex', alignItems:'center',
+        }}>
+          <RefreshIcon size={18} color={colors.text} spinning={loading} />
         </button>
       </div>
 
       <div style={{ padding: isDesktop ? '24px 36px 40px' : '16px 16px 100px' }}>
         <FilterBar
-          QUICK={QUICK} filterMode={filterMode} activeQuick={activeQuick}
+          QUICK={QUICK}
+          filterMode={filterMode}       activeQuick={activeQuick}
           setFilterMode={setFilterMode} setActiveQuick={setActiveQuick}
           selectedMonth={selectedMonth} setSelMonth={setSelMonth}
-          availMonths={availMonths} MONTH_NAMES={MONTH_NAMES}
+          availMonths={availMonths}
           showMonthMenu={showMonthMenu} setShowMonthMenu={setShowMonthMenu}
-          dateRange={dateRange} setDateRange={setDateRange}
-          fetchData={fetchData} colors={colors} isAdmin={isAdmin}
-          exportOpen={exportOpen} setExportOpen={setExportOpen}
-          exportRef={exportRef} monthMenuRef={monthMenuRef}
-          dateInpStyle={dateInpStyle} navyBtnStyle={navyBtnStyle}
+          dateRange={dateRange}         setDateRange={setDateRange}
+          fetchData={fetchData}
+          colors={colors}
         />
 
         {error && (
-          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#EF4444' }}>
+          <div style={{ textAlign:'center', padding:'60px 20px', color:'#EF4444' }}>
             <AlertIcon size={40} />
-            <p style={{ marginTop: '12px', fontSize: TYPE.base }}>Gagal memuat data dari Google Sheets.</p>
-            <button onClick={fetchData} style={{ ...navyBtnStyle, marginTop: '16px', borderRadius: RADIUS.md }}>
+            <p style={{ marginTop:'12px', fontSize:TYPE.base }}>Gagal memuat data dari Google Sheets.</p>
+            <button onClick={handleRefresh} style={{
+              marginTop:'16px', height:'38px', padding:'0 20px',
+              background:NAVY[700], color:'#fff', border:'none',
+              borderRadius:RADIUS.md, fontSize:TYPE.sm, fontWeight:'600',
+              cursor:'pointer', fontFamily:FONT,
+            }}>
               Coba Lagi
             </button>
           </div>
         )}
 
-        {!error && (
+        {!error && loading && <SkeletonDashboard isDesktop={isDesktop} colors={colors} />}
+
+        {!error && !loading && (
           <>
             {/* KPI Cards */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: isDesktop ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
-              gap: '14px', marginBottom: '20px',
+              display:'grid',
+              gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)',
+              gap:'14px', marginBottom:'20px',
             }}>
-              <KpiCard label="Total Paket"    value={meta.totalScan}  accent={NAVY[700]}  colors={colors} unit="pcs" />
-              <KpiCard label="Staff Aktif"    value={meta.staffCount} accent="#6B7280"    colors={colors} unit="org" />
+              <KpiCard label="Total Paket"    value={meta.totalScan}  accent={NAVY[700]} colors={colors} unit="pcs" />
+              <KpiCard label="Staff Aktif"    value={meta.staffCount} accent="#6B7280"   colors={colors} unit="org" />
               {isDesktop && rows.length > 0 && (
-                <KpiCard label="Top Performer" value={rows[0]?.nama}  accent="#D4AF37"    colors={colors} small />
+                <KpiCard label="Top Performer" value={rows[0]?.nama}  accent="#D4AF37"   colors={colors} small />
               )}
             </div>
 
             {/* Charts */}
             <div style={{
               display: isDesktop ? 'grid' : 'flex',
-              flexDirection: 'column',
-              gridTemplateColumns: '1.3fr 0.7fr',
-              gap: '20px',
+              flexDirection:'column',
+              gridTemplateColumns:'1.3fr 0.7fr',
+              gap:'20px',
             }}>
-              <ChartCard rows={rows} colors={colors} barColor={barColor} loading={loading} />
+              <ChartCard rows={rows} colors={colors} barColor={barColor} loading={false} />
               <RankCard  rows={rows} colors={colors} rankStyle={rankStyle} barColor={barColor} />
             </div>
           </>
