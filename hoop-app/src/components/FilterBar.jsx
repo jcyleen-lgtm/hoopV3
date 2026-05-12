@@ -52,7 +52,6 @@ const FilterBar = ({
     return idx >= 0 ? MONTH_SHORT[idx] : selectedMonth;
   }, [selectedMonth]);
 
-  // FIX: langsung pass monthName ke fetchData, tidak tunggu state update React
   const handleMonthSelect = (monthName) => {
     setSelMonth(monthName);
     setFilterMode('month');
@@ -60,12 +59,14 @@ const FilterBar = ({
     fetchData('month', null, monthName);
   };
 
+  // FIX: jangan ubah filterMode supaya input tanggal tidak hilang
+  // cukup pass 'custom' + range langsung ke fetchData
   const handleCustomApply = () => {
     if (!dateRange.start || !dateRange.end) return;
-    setFilterMode('custom');
     fetchData('custom', dateRange, null);
   };
 
+  // Input muncul selama pill "Custom" aktif (filterMode quick + activeQuick custom)
   const isCustomActive = filterMode === 'quick' && activeQuick === 'custom';
 
   return (
@@ -151,7 +152,7 @@ const FilterBar = ({
         </div>
       </div>
 
-      {/* Custom date range */}
+      {/* Custom date range — muncul selama pill Custom aktif */}
       {isCustomActive && (
         <div style={{ display:'flex', alignItems:'center', gap:'8px', marginTop:'10px', flexWrap:'wrap' }}>
           <span style={{ fontSize:TYPE.xs, color:'rgba(181,212,244,0.45)', whiteSpace:'nowrap' }}>Dari</span>
