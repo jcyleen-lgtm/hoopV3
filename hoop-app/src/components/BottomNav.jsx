@@ -40,10 +40,14 @@ const BottomNav = ({ page, onNavigate }) => (
             cursor: 'pointer', position: 'relative', padding: '0',
             fontFamily: FONT, height: '100%', borderRadius: '999px',
           }}>
+            {/* Active indicator — pill shape supaya cover label panjang */}
             {active && (
               <div style={{
                 position: 'absolute',
-                width: '54px', height: '54px', borderRadius: '50%',
+                // lebar mengikuti konten tab, min 54px
+                width: 'calc(100% - 4px)',
+                height: '54px',
+                borderRadius: '999px',
                 background: 'linear-gradient(135deg, #1A3A5C, #3B82C4)',
                 boxShadow: '0 4px 20px rgba(59,130,196,0.5), inset 0 1px 0 rgba(255,255,255,0.15)',
                 top: '50%', left: '50%',
