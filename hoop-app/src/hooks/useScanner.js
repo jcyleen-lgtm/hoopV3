@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 
-const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL;
+const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URLcd
 const MAX_HISTORY = 8;
 
 // JSONP call — only way to hit Apps Script /exec from browser without CORS error

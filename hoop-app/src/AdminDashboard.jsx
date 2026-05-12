@@ -63,8 +63,12 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
   // Fetch available month sheets on mount
   useEffect(() => {
     callScript({ action: 'getMonths' })
-      .then(r => { if (r?.months) setAvail(r.months); })
-      .catch(() => {});
+      .then(r => { 
+        console.log('getMonths response:', r);
+        if (r?.months) setAvail(r.months);
+        else console.warn('No months in response:', r);
+      })
+      .catch(err => console.error('getMonths error:', err));
   }, []);
 
   const fetchData = useCallback(async () => {
