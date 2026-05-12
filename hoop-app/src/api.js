@@ -1,6 +1,4 @@
-// URL priority: Cloudflare env variable → fallback hardcoded
-const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL 
-  || 'https://script.google.com/macros/s/AKfycbxH61RwntWOKccbZ2Y24OpD3pN4ya5Rh_Law1955LvMvq_Mns3lT8LINGFXs3mCB06h/exec';
+const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL
 
 // JSONP — only way to call Apps Script /exec from browser without CORS error
 export const callScript = (params) => new Promise((resolve, reject) => {
