@@ -54,7 +54,6 @@ const SkeletonDashboard = ({ isDesktop, colors }) => (
   </>
 );
 
-// ── Icons ─────────────────────────────────────────────────────
 const RefreshIcon = ({ size=18, color='currentColor', spinning }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
     style={{ animation: spinning ? 'spin 0.8s linear infinite' : 'none' }}>
@@ -67,7 +66,6 @@ const AlertIcon = ({ size=40, color='#EF4444' }) => (
   </svg>
 );
 
-// ── Main Component ────────────────────────────────────────────
 const AdminDashboard = ({ user, isDesktop, theme }) => {
   const colors  = makeColors(theme || 'dark');
   const isAdmin = user?.role === 'Admin' || user?.role === 'admin';
@@ -86,6 +84,12 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
   const cache = useRef({});
 
+  // Simpan state terbaru di ref supaya fetchData bisa baca tanpa stale closure
+  const stateRef = useRef({ filterMode, activeQuick, selectedMonth, dateRange });
+  useEffect(() => {
+    stateRef.current = { filterMode, activeQuick, selectedMonth, dateRange };
+  });
+
   const barColor  = (i) => ['#3B82C4','#2D5A8E','#1E3A5F','#5B9BD5','#85B7E8'][Math.min(i,4)];
   const rankStyle = (i) => {
     if (i===0) return { bg:'#D4AF37', color:'#fff' };
@@ -101,15 +105,21 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
       .catch(() => {});
   }, []);
 
-  const fetchData = useCallback(async (overrideMode, overrideRange) => {
-    const mode  = overrideMode  ?? filterMode;
-    const range = overrideRange ?? dateRange;
+  // fetchData menerima override langsung supaya tidak perlu tunggu React re-render state
+  // overrideMode: 'quick' | 'month' | 'custom'
+  // overrideRange: { start, end } untuk custom
+  // overrideMonth: string nama bulan untuk mode 'month'
+  const fetchData = useCallback(async (overrideMode, overrideRange, overrideMonth) => {
+    const s     = stateRef.current;
+    const mode  = overrideMode  ?? s.filterMode;
+    const range = overrideRange ?? s.dateRange;
+    const month = overrideMonth ?? s.selectedMonth;
 
     const cacheKey = mode === 'month'
-      ? `month_${selectedMonth}`
+      ? `month_${month}`
       : mode === 'custom'
-        ? `custom_${range.start}_${range.end}`
-        : `quick_${activeQuick}`;
+        ? `custom_${range?.start}_${range?.end}`
+        : `quick_${s.activeQuick}`;
 
     // Langsung dari cache — tidak perlu loading
     if (cache.current[cacheKey]) {
@@ -125,13 +135,17 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
     setError(false);
 
     try {
+      // type yang dikirim ke Apps Script
       const type = mode === 'month'
-        ? selectedMonth
-        : mode === 'custom' ? 'custom' : activeQuick;
+        ? month                          // e.g. "May"
+        : mode === 'custom' ? 'custom'
+        : s.activeQuick;                 // today / yesterday / monthly
 
       const res = await callScript({
-        action:'getRekapan', type,
-        start: range.start, end: range.end,
+        action: 'getRekapan',
+        type,
+        start: range?.start || '',
+        end:   range?.end   || '',
       });
 
       if (res?.status === 'success') {
@@ -146,25 +160,24 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
     } finally {
       setLoading(false);
     }
-  }, [filterMode, activeQuick, selectedMonth, dateRange]);
+  }, []); // tidak ada dependency — pakai stateRef
+
+  // Fetch pertama kali saat mount
+  useEffect(() => { fetchData(); }, []); // eslint-disable-line
 
   // Fetch saat quick filter berubah
   useEffect(() => {
-    if (filterMode === 'quick') fetchData();
+    if (filterMode === 'quick') fetchData('quick');
   }, [activeQuick]); // eslint-disable-line
 
-  // Fetch saat bulan dipilih
-  useEffect(() => {
-    if (filterMode === 'month' && selectedMonth) fetchData();
-  }, [selectedMonth, filterMode]); // eslint-disable-line
-
-  // Manual refresh — hapus cache entry aktif dulu
+  // Manual refresh — hapus cache entry aktif
   const handleRefresh = () => {
-    const cacheKey = filterMode === 'month'
-      ? `month_${selectedMonth}`
-      : filterMode === 'custom'
-        ? `custom_${dateRange.start}_${dateRange.end}`
-        : `quick_${activeQuick}`;
+    const s = stateRef.current;
+    const cacheKey = s.filterMode === 'month'
+      ? `month_${s.selectedMonth}`
+      : s.filterMode === 'custom'
+        ? `custom_${s.dateRange.start}_${s.dateRange.end}`
+        : `quick_${s.activeQuick}`;
     delete cache.current[cacheKey];
     fetchData();
   };
@@ -230,7 +243,6 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
         {!error && !loading && (
           <>
-            {/* KPI Cards */}
             <div style={{
               display:'grid',
               gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)',
@@ -243,7 +255,6 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
               )}
             </div>
 
-            {/* Charts */}
             <div style={{
               display: isDesktop ? 'grid' : 'flex',
               flexDirection:'column',

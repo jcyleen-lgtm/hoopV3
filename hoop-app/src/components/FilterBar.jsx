@@ -5,8 +5,8 @@ const FilterIcon   = ({ color }) => <svg width="13" height="13" viewBox="0 0 24 
 const CalendarIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
 const ChevronIcon  = ({ open }) => <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{transform:open?'rotate(180deg)':'none',transition:'transform .15s'}}><polyline points="6 9 12 15 18 9"/></svg>;
 
-const MONTH_SHORT  = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const FULL_MONTHS  = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTH_SHORT   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const FULL_MONTHS   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_PATTERN = /^(January|February|March|April|May|June|July|August|September|October|November|December)$/;
 
 const pill = (active) => ({
@@ -42,7 +42,6 @@ const FilterBar = ({
     return () => document.removeEventListener('mousedown', handler);
   }, [showMonthMenu, setShowMonthMenu]);
 
-  // Bulan yang ada datanya di Sheet
   const validMonths = useMemo(() =>
     (availMonths || []).filter(m => MONTH_PATTERN.test(m)),
   [availMonths]);
@@ -53,16 +52,18 @@ const FilterBar = ({
     return idx >= 0 ? MONTH_SHORT[idx] : selectedMonth;
   }, [selectedMonth]);
 
+  // FIX: langsung pass monthName ke fetchData, tidak tunggu state update React
   const handleMonthSelect = (monthName) => {
     setSelMonth(monthName);
     setFilterMode('month');
     setShowMonthMenu(false);
+    fetchData('month', null, monthName);
   };
 
   const handleCustomApply = () => {
     if (!dateRange.start || !dateRange.end) return;
     setFilterMode('custom');
-    setTimeout(() => fetchData(), 0);
+    fetchData('custom', dateRange, null);
   };
 
   const isCustomActive = filterMode === 'quick' && activeQuick === 'custom';
@@ -118,7 +119,6 @@ const FilterBar = ({
               }}>
                 PILIH BULAN
               </div>
-              {/* Grid 4 kolom Jan–Dec */}
               <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'4px' }}>
                 {FULL_MONTHS.map((fullName, i) => {
                   const exists = validMonths.includes(fullName);
