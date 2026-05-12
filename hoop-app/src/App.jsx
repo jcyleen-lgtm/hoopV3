@@ -31,11 +31,7 @@ function App() {
     if (!username || !password) return alert('Isi Username dan Password!');
     setAuthLoading(true);
     try {
-      const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL;
-      const response = await fetch(
-        `${SCRIPT_URL}?action=login&user=${encodeURIComponent(username)}&pass=${encodeURIComponent(password)}`
-      );
-      const res = await response.json();
+      const res = await callScript({ action:'login', user:username, pass:password });
       if (res?.status === 'success') {
         const userData = { name: res.username, role: res.role };
         localStorage.setItem('lscan_user', JSON.stringify(userData));
