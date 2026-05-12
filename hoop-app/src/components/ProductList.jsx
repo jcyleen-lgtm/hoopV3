@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { callScript } from '../api';
 import { NAVY, RADIUS, TYPE, FONT } from '../theme';
 
-const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL;
 const BORDER_STOPS = [NAVY[700], NAVY[600], NAVY[500], NAVY[400], NAVY[300]];
 
 const SearchIcon  = ({ color }) => <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
@@ -19,9 +18,8 @@ const ProductList = ({ colors, isDesktop }) => {
   const fetchProducts = useCallback(() => {
     setLoading(true);
     setError(false);
-    axios.get(SCRIPT_URL, { params: { action: 'getProduk' }, timeout: 12000 })
-      .then(response => {
-        const res = response.data;
+    callScript({ action: 'getProduk' })
+      .then(res => {
         // Apps Script returns array directly OR {status, data}
         if (Array.isArray(res)) {
           setList(res);

@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import axios from 'axios';
+import { callScript } from './api';
 import { NAVY, RADIUS, TYPE, FONT, makeColors } from './theme';
 import KpiCard   from './components/KpiCard';
 import ChartCard from './components/ChartCard';
 import RankCard  from './components/RankCard';
 import FilterBar from './components/FilterBar';
 
-const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL;
 
 const MONTH_NAMES = [
   'January','February','March','April','May','June',
@@ -51,6 +50,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
   const exportRef    = useRef(null);
   const monthMenuRef = useRef(null);
+  const cache        = useRef({});
 
   const barColor  = (i) => ['#3B82C4','#2D5A8E','#1E3A5F','#5B9BD5','#85B7E8'][Math.min(i, 4)];
   const rankStyle = (i) => {
@@ -62,12 +62,19 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
   // Fetch available month sheets on mount
   useEffect(() => {
-    axios.get(SCRIPT_URL, { params: { action: 'getMonths' }, timeout: 12000 })
-      .then(r => { if (r.data?.months) setAvail(r.data.months); })
+    callScript({ action: 'getMonths' })
+      .then(r => { if (r?.months) setAvail(r.months); })
       .catch(() => {});
   }, []);
 
   const fetchData = useCallback(async () => {
+    // Cache key
+    const cacheKey = filterMode === 'month' ? selectedMonth : filterMode === 'custom' ? `${dateRange.start}_${dateRange.end}` : activeQuick;
+    if (cache.current[cacheKey]) {
+      const cached = cache.current[cacheKey];
+      setRows(cached.data); setMeta({ totalScan: cached.totalScan, staffCount: cached.staffCount });
+      setLoading(false); return;
+    }
     setLoading(true);
     setError(false);
     try {
@@ -75,14 +82,12 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
         ? selectedMonth
         : filterMode === 'custom' ? 'custom' : activeQuick;
 
-      const response = await axios.get(SCRIPT_URL, {
-        params: { action: 'getRekapan', type, start: dateRange.start, end: dateRange.end }, timeout: 15000
-      });
-      const res = response.data;
+      const res = await callScript({ action: 'getRekapan', type, start: dateRange.start, end: dateRange.end });
 
       if (res?.status === 'success') {
         setRows(res.data || []);
         setMeta({ totalScan: res.totalScan ?? 0, staffCount: res.staffCount ?? 0 });
+        cache.current[cacheKey] = res;
       } else {
         setError(true);
       }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Scanner from './Scanner';
 import LoginPage from './components/LoginPage';
 import { makeColors } from './theme';
+import { callScript } from './api';
 
 function App() {
   const [user, setUser] = useState(() => {

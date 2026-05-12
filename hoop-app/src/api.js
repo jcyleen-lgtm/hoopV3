@@ -1,20 +1,22 @@
-import axios from 'axios';
-
-// Ganti dengan URL Google Apps Script lo yang ada di AdminDashboard.jsx tadi
 const SCRIPT_URL = import.meta.env.VITE_SCRIPT_URL;
 
-export const getRekapan = async (params) => {
-  try {
-    // Vite dan Axios jauh lebih rapi dibanding JSONP
-    const response = await axios.get(SCRIPT_URL, {
-      params: {
-        action: 'getRekapan',
-        ...params
-      }
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Gagal ambil data:", error);
-    throw error;
-  }
-};
+// JSONP — only way to call Apps Script /exec from browser
+export const callScript = (params) => new Promise((resolve, reject) => {
+  const cb  = '_gs_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+  const tid = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 15000);
+
+  const cleanup = () => {
+    clearTimeout(tid);
+    delete window[cb];
+    document.getElementById(cb)?.remove();
+  };
+
+  window[cb] = (data) => { cleanup(); resolve(data); };
+
+  const qs  = new URLSearchParams({ ...params, callback: cb }).toString();
+  const el  = document.createElement('script');
+  el.id     = cb;
+  el.src    = `${SCRIPT_URL}?${qs}`;
+  el.onerror = () => { cleanup(); reject(new Error('Network error')); };
+  document.head.appendChild(el);
+});
