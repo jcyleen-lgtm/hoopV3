@@ -61,8 +61,10 @@ const FilterBar = ({
 
   const handleCustomApply = () => {
     if (!dateRange.start || !dateRange.end) return;
+    // setFilterMode dipanggil SETELAH fetchData supaya tidak race condition
+    // fetchData sudah dapat overrideMode='custom' langsung
+    fetchData('custom', { start: dateRange.start, end: dateRange.end }, null);
     setFilterMode('custom');
-    fetchData('custom', dateRange, null);
   };
 
   // Input muncul selama pill "Custom" aktif (filterMode quick + activeQuick custom)

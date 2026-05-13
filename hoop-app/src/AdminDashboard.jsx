@@ -126,9 +126,11 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
   const fetchData = useCallback(async (overrideMode, overrideRange, overrideMonth) => {
     const s     = stateRef.current;
-    const mode  = overrideMode  ?? s.filterMode;
-    const range = overrideRange ?? s.dateRange;
-    const month = overrideMonth ?? s.selectedMonth;
+    const mode  = overrideMode  !== undefined ? overrideMode  : s.filterMode;
+    // overrideRange selalu dipakai kalau ada — jangan fallback ke stateRef
+    // karena stateRef belum tentu update saat fetchData dipanggil
+    const range = overrideRange !== undefined && overrideRange !== null ? overrideRange : s.dateRange;
+    const month = overrideMonth !== undefined && overrideMonth !== null ? overrideMonth : s.selectedMonth;
     const quick = s.activeQuick;
 
     const cacheKey = getCacheKey(mode, quick, month, range);
@@ -162,8 +164,8 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
       const res = await callScript({
         action: 'getRekapan',
         type,
-        start: range?.start || '',
-        end:   range?.end   || '',
+        start: (range?.start || '').trim(),
+        end:   (range?.end   || '').trim(),
       });
 
       if (res?.status === 'success') {
