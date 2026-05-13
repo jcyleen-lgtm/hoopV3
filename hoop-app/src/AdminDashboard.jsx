@@ -13,6 +13,9 @@ const QUICK = [
   { value: 'custom',    label: 'Custom'    },
 ];
 
+// ── Cache global (persist selama tab hidup, tidak reset saat ganti halaman) ──
+const GLOBAL_CACHE = {};
+
 // ── Skeleton shimmer ──────────────────────────────────────────
 const Shimmer = ({ w = '100%', h = '18px', r = '8px' }) => (
   <div style={{
@@ -72,7 +75,10 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
   const [rows, setRows]         = useState([]);
   const [meta, setMeta]         = useState({ totalScan:0, staffCount:0 });
-  const [loading, setLoading]   = useState(true);
+  // initialLoading: true hanya saat pertama kali (belum ada data sama sekali)
+  // fetching: true saat sedang fetch (tapi data lama masih tampil)
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [fetching, setFetching]             = useState(false);
   const [error, setError]       = useState(false);
   const [availMonths, setAvail] = useState([]);
 
@@ -81,8 +87,6 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
   const [selectedMonth, setSelMonth]      = useState('');
   const [dateRange, setDateRange]         = useState({ start:'', end:'' });
   const [showMonthMenu, setShowMonthMenu] = useState(false);
-
-  const cache = useRef({});
 
   // Simpan state terbaru di ref supaya fetchData bisa baca tanpa stale closure
   const stateRef = useRef({ filterMode, activeQuick, selectedMonth, dateRange });
@@ -98,48 +102,62 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
     return { bg:colors.surface, color:colors.text };
   };
 
-  // Load available month sheets sekali saat mount
+  // Load available month sheets — pakai global cache juga
   useEffect(() => {
+    if (GLOBAL_CACHE['__months__']) {
+      setAvail(GLOBAL_CACHE['__months__']);
+      return;
+    }
     callScript({ action:'getMonths' })
-      .then(r => { if (r?.months) setAvail(r.months); })
+      .then(r => {
+        if (r?.months) {
+          GLOBAL_CACHE['__months__'] = r.months;
+          setAvail(r.months);
+        }
+      })
       .catch(() => {});
   }, []);
 
-  // fetchData menerima override langsung supaya tidak perlu tunggu React re-render state
-  // overrideMode: 'quick' | 'month' | 'custom'
-  // overrideRange: { start, end } untuk custom
-  // overrideMonth: string nama bulan untuk mode 'month'
+  const getCacheKey = useCallback((mode, quick, month, range) => {
+    if (mode === 'month')  return `month_${month}`;
+    if (mode === 'custom') return `custom_${range?.start}_${range?.end}`;
+    return `quick_${quick}`;
+  }, []);
+
   const fetchData = useCallback(async (overrideMode, overrideRange, overrideMonth) => {
     const s     = stateRef.current;
     const mode  = overrideMode  ?? s.filterMode;
     const range = overrideRange ?? s.dateRange;
     const month = overrideMonth ?? s.selectedMonth;
+    const quick = s.activeQuick;
 
-    const cacheKey = mode === 'month'
-      ? `month_${month}`
-      : mode === 'custom'
-        ? `custom_${range?.start}_${range?.end}`
-        : `quick_${s.activeQuick}`;
+    const cacheKey = getCacheKey(mode, quick, month, range);
 
-    // Langsung dari cache — tidak perlu loading
-    if (cache.current[cacheKey]) {
-      const c = cache.current[cacheKey];
+    // Hit cache → tampil instant, tidak ada loading sama sekali
+    if (GLOBAL_CACHE[cacheKey]) {
+      const c = GLOBAL_CACHE[cacheKey];
       setRows(c.data);
       setMeta({ totalScan:c.totalScan, staffCount:c.staffCount });
-      setLoading(false);
+      setInitialLoading(false);
+      setFetching(false);
       setError(false);
       return;
     }
 
-    setLoading(true);
+    // Kalau sudah ada data lama, pakai fetching (subtle spinner)
+    // Kalau belum ada data sama sekali, pakai skeleton penuh
+    if (rows.length > 0) {
+      setFetching(true);
+    } else {
+      setInitialLoading(true);
+    }
     setError(false);
 
     try {
-      // type yang dikirim ke Apps Script
       const type = mode === 'month'
-        ? month                          // e.g. "May"
+        ? month
         : mode === 'custom' ? 'custom'
-        : s.activeQuick;                 // today / yesterday / monthly
+        : quick;
 
       const res = await callScript({
         action: 'getRekapan',
@@ -149,7 +167,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
       });
 
       if (res?.status === 'success') {
-        cache.current[cacheKey] = res;
+        GLOBAL_CACHE[cacheKey] = res;
         setRows(res.data || []);
         setMeta({ totalScan:res.totalScan??0, staffCount:res.staffCount??0 });
       } else {
@@ -158,9 +176,10 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
     } catch {
       setError(true);
     } finally {
-      setLoading(false);
+      setInitialLoading(false);
+      setFetching(false);
     }
-  }, []); // tidak ada dependency — pakai stateRef
+  }, [getCacheKey, rows.length]);
 
   // Fetch pertama kali saat mount
   useEffect(() => { fetchData(); }, []); // eslint-disable-line
@@ -173,14 +192,14 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
   // Manual refresh — hapus cache entry aktif
   const handleRefresh = () => {
     const s = stateRef.current;
-    const cacheKey = s.filterMode === 'month'
-      ? `month_${s.selectedMonth}`
-      : s.filterMode === 'custom'
-        ? `custom_${s.dateRange.start}_${s.dateRange.end}`
-        : `quick_${s.activeQuick}`;
-    delete cache.current[cacheKey];
+    const cacheKey = getCacheKey(s.filterMode, s.activeQuick, s.selectedMonth, s.dateRange);
+    delete GLOBAL_CACHE[cacheKey];
+    setRows([]); // force skeleton
     fetchData();
   };
+
+  const showSkeleton = initialLoading && !error;
+  const showData     = !initialLoading && !error;
 
   return (
     <div style={{ background:'transparent', fontFamily:FONT }}>
@@ -203,12 +222,12 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
             WAREHOUSE PERFORMANCE ANALYTICS
           </p>
         </div>
-        <button onClick={handleRefresh} disabled={loading} style={{
+        <button onClick={handleRefresh} disabled={initialLoading || fetching} style={{
           background:colors.surface, border:`1px solid ${colors.border}`,
           borderRadius:RADIUS.sm, padding:'8px', cursor:'pointer',
           display:'flex', alignItems:'center',
         }}>
-          <RefreshIcon size={18} color={colors.text} spinning={loading} />
+          <RefreshIcon size={18} color={colors.text} spinning={initialLoading || fetching} />
         </button>
       </div>
 
@@ -240,10 +259,11 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
           </div>
         )}
 
-        {!error && loading && <SkeletonDashboard isDesktop={isDesktop} colors={colors} />}
+        {showSkeleton && <SkeletonDashboard isDesktop={isDesktop} colors={colors} />}
 
-        {!error && !loading && (
-          <>
+        {showData && (
+          /* opacity saat fetching supaya user tahu ada update tanpa skeleton */
+          <div style={{ opacity: fetching ? 0.6 : 1, transition: 'opacity 0.2s ease', pointerEvents: fetching ? 'none' : 'auto' }}>
             <div style={{
               display:'grid',
               gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)',
@@ -265,7 +285,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
               <ChartCard rows={rows} colors={colors} barColor={barColor} loading={false} />
               <RankCard  rows={rows} colors={colors} rankStyle={rankStyle} barColor={barColor} />
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
