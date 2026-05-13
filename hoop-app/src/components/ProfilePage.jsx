@@ -84,16 +84,16 @@ const ProfilePage = ({ user, theme, colors, onToggleTheme, onLogout }) => {
               onClick={onToggleTheme}
               style={{
                 width: '44px', height: '26px', borderRadius: '999px', border: 'none',
-                background: theme === 'dark'
+                background: theme === 'light'
                   ? 'linear-gradient(135deg,#1A3A5C,#3B82C4)'
-                  : 'rgba(200,210,225,0.8)',
+                  : 'rgba(200,210,225,0.3)',
                 cursor: 'pointer', position: 'relative', transition: 'background .2s', flexShrink: 0,
-                boxShadow: theme === 'dark' ? '0 0 12px rgba(59,130,196,0.4)' : 'none',
+                boxShadow: theme === 'light' ? '0 0 12px rgba(59,130,196,0.4)' : 'none',
               }}
             >
               <div style={{
                 position: 'absolute', top: '3px',
-                left: theme === 'dark' ? '21px' : '3px',
+                left: theme === 'light' ? '21px' : '3px',
                 width: '20px', height: '20px', borderRadius: '50%',
                 background: '#fff', transition: 'left .2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
               }} />
