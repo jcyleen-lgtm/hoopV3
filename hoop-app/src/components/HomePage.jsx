@@ -174,31 +174,58 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
   ];
 
   // ── Render ────────────────────────────────────────────────────
-  const Greeting = () => (
-    <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-      <div>
-        <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginBottom: '4px' }}>
-          {new Date().getHours() < 12 ? 'Selamat pagi' : new Date().getHours() < 17 ? 'Selamat siang' : 'Selamat malam'}
+  const Greeting = () => {
+    const hour = new Date().getHours();
+    const timeLabel = hour < 5 ? 'Selamat malam' : hour < 12 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam';
+    const motivasi = hour < 5
+      ? 'Masih lembur? Kamu luar biasa, jaga stamina ya 🌙'
+      : hour < 9
+      ? 'Hari baru, target baru. Ayo kejar! 🚀'
+      : hour < 12
+      ? 'Pagi produktif, semangat penuh! Keep going 🔥'
+      : hour < 14
+      ? 'Tetap fokus, siang ini kita selesaikan semua! 💡'
+      : hour < 17
+      ? 'Sore ini masih ada waktu, maksimalkan! ⚡'
+      : hour < 20
+      ? 'Penutup hari yang hebat, habiskan sepenuh hati! 🏁'
+      : 'Lembur mode ON — tim terbaik ga kenal menyerah 💯';
+
+    return (
+      <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginBottom: '4px' }}>
+            {timeLabel}
+          </div>
+          <div style={{ fontSize: isDesktop ? '26px' : '22px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.6px', lineHeight: 1, marginBottom: '6px' }}>
+            {user?.name || 'Admin'}
+          </div>
+          {/* Motivasi */}
+          <div style={{
+            fontSize: '11px', fontWeight: '600',
+            color: isLight ? 'rgba(30,60,120,0.55)' : 'rgba(148,185,230,0.55)',
+            lineHeight: 1.4, marginBottom: '8px',
+            maxWidth: isDesktop ? '320px' : '220px',
+          }}>
+            {motivasi}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLight ? '#16A34A' : '#22C55E', boxShadow: isLight ? '0 0 10px rgba(22,163,74,0.8)' : '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)', flexShrink: 0 }} />
+            <span style={{ fontSize: '11px', color: isLight ? 'rgba(30,60,120,0.45)' : 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
+          </div>
         </div>
-        <div style={{ fontSize: isDesktop ? '26px' : '22px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.6px', lineHeight: 1 }}>
-          {user?.name || 'Admin'}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
-          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLight ? '#16A34A' : '#22C55E', boxShadow: isLight ? '0 0 10px rgba(22,163,74,0.8)' : '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)' }} />
-          <span style={{ fontSize: '11px', color: isLight ? 'rgba(30,60,120,0.45)' : 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0, marginLeft: '12px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: '20px', padding: '4px 10px', boxShadow: '0 0 14px rgba(239,68,68,0.12)' }}>
+            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
+            <span style={{ fontSize: '10px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>LIVE</span>
+          </div>
+          <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#1E3A6E,#3B82C4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', border: '1.5px solid rgba(59,130,196,0.35)', boxShadow: '0 0 16px rgba(59,130,196,0.3)' }}>
+            {(user?.name || 'AD').slice(0, 2).toUpperCase()}
+          </div>
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: '20px', padding: '4px 10px', boxShadow: '0 0 14px rgba(239,68,68,0.12)' }}>
-          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
-          <span style={{ fontSize: '10px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>LIVE</span>
-        </div>
-        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#1E3A6E,#3B82C4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', border: '1.5px solid rgba(59,130,196,0.35)', boxShadow: '0 0 16px rgba(59,130,196,0.3)' }}>
-          {(user?.name || 'AD').slice(0, 2).toUpperCase()}
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const Divider = () => (
     <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(59,130,196,0.15),transparent)', margin: '20px 20px 0' }} />

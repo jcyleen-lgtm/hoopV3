@@ -135,7 +135,7 @@ const ProfilePage = ({ user, theme, colors, onToggleTheme, onLogout }) => {
         </button>
 
         <div style={{ textAlign: 'center', marginTop: '28px', fontSize: TYPE.xs, color: colors.subText, letterSpacing: '.04em' }}>
-          Hoop · v3.0
+          Hoop · v3
         </div>
       </div>
     </div>

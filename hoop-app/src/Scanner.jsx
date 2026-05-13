@@ -150,7 +150,7 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
           <path d="M2 12l10 5 10-5"/>
         </svg>
       </div>
-      <span style={{ fontSize: TYPE.md, fontWeight: '800', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '-0.3px' }}>HoopV3</span>
+      <span style={{ fontSize: TYPE.md, fontWeight: '800', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '-0.3px' }}>Hoop</span>
     </div>
 
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

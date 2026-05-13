@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { FONT, RADIUS, TYPE } from '../theme';
 
-const BoxIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+// Logo — abstract "H" mark / warehouse flow icon
+const HoopLogo = () => (
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <rect x="4" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
+    <rect x="15" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
+    <rect x="26" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
+    <rect x="4" y="16" width="28" height="5" rx="2.5" fill="white" opacity="0.55"/>
+    <circle cx="18" cy="18.5" r="3.5" fill="#3B82C4" opacity="0.9"/>
   </svg>
 );
 
@@ -33,11 +37,12 @@ const LoginPage = ({ onLogin, isLoading }) => {
         @keyframes floatOrb1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-40px)} }
         @keyframes floatOrb2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,30px)} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
-        @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+        @keyframes logoPulse { 0%,100%{box-shadow:0 0 0 1px rgba(91,155,213,0.2),0 16px 48px rgba(59,130,196,0.3),inset 0 1px 0 rgba(255,255,255,0.1)} 50%{box-shadow:0 0 0 1px rgba(91,155,213,0.35),0 16px 60px rgba(59,130,196,0.45),inset 0 1px 0 rgba(255,255,255,0.15)} }
 
         .login-card { animation: fadeUp 0.6s cubic-bezier(.22,1,.36,1) forwards; }
         .orb1 { animation: floatOrb1 8s ease-in-out infinite; }
         .orb2 { animation: floatOrb2 10s ease-in-out infinite; }
+        .logo-box { animation: logoPulse 3s ease-in-out infinite; }
 
         .glass-input {
           width: 100%; height: 52px;
@@ -95,18 +100,19 @@ const LoginPage = ({ onLogin, isLoading }) => {
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '72px', height: '72px', borderRadius: '22px', margin: '0 auto 16px',
-            background: 'linear-gradient(135deg, #0D2137 0%, #3B82C4 100%)',
+          <div className="logo-box" style={{
+            width: '80px', height: '80px', borderRadius: '26px', margin: '0 auto 18px',
+            background: 'linear-gradient(135deg, #0A1929 0%, #1A3A5C 40%, #3B82C4 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 0 1px rgba(91,155,213,0.2), 0 16px 48px rgba(59,130,196,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
           }}>
-            <BoxIcon />
+            <HoopLogo />
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px', marginBottom: '4px' }}>
-            HOOP<span style={{ color: '#3B82C4' }}>V3</span>
+          <h1 style={{ fontSize: '32px', fontWeight: '900', color: '#fff', letterSpacing: '-1px', marginBottom: '5px' }}>
+            HOOP
           </h1>
-          <p style={{ fontSize: TYPE.sm, color: 'rgba(181,212,244,0.45)' }}>Warehouse Packing System</p>
+          <p style={{ fontSize: TYPE.sm, color: 'rgba(181,212,244,0.4)', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: '500' }}>
+            Warehouse Packing System
+          </p>
         </div>
 
         {/* Glass card */}
@@ -123,7 +129,6 @@ const LoginPage = ({ onLogin, isLoading }) => {
             Sign in to continue
           </p>
 
-          {/* Username field */}
           <div style={{ position: 'relative', marginBottom: '12px' }}>
             <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(91,155,213,0.5)" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -133,7 +138,6 @@ const LoginPage = ({ onLogin, isLoading }) => {
               disabled={isLoading} autoComplete="off" />
           </div>
 
-          {/* Password field */}
           <div style={{ position: 'relative', marginBottom: '24px' }}>
             <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(91,155,213,0.5)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -150,8 +154,8 @@ const LoginPage = ({ onLogin, isLoading }) => {
           </button>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: TYPE.xs, color: 'rgba(181,212,244,0.2)' }}>
-          HoopV3 © {new Date().getFullYear()} · Warehouse Analytics
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: TYPE.xs, color: 'rgba(181,212,244,0.18)' }}>
+          Hoop © {new Date().getFullYear()} · Warehouse Intelligence
         </p>
       </div>
     </div>
