@@ -23,10 +23,10 @@ const LoginPage = ({ onLogin, isLoading }) => {
 
   return (
     <div style={{
-      minHeight: '100vh', fontFamily: FONT,
+      height: '100dvh', fontFamily: FONT,
       background: '#020810',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: '24px', position: 'relative', overflow: 'hidden',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: '24px', position: 'fixed', inset: 0, overflow: 'hidden',
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');

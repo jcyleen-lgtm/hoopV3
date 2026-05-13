@@ -125,30 +125,41 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   );
 };
 
+// ── Hoop Logo (same as sidebar) ────────────────────────────────────────────────
+const HoopLogoSVG = () => (
+  <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
+    <rect x="4" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
+    <rect x="15" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
+    <rect x="26" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
+    <rect x="4" y="16" width="28" height="5" rx="2.5" fill="white" opacity="0.5"/>
+    <circle cx="18" cy="18.5" r="3.5" fill="#60A5FA" opacity="0.95"/>
+  </svg>
+);
+
 // ── Sub-Component: TopBar ──────────────────────────────────────────────────────
 const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIcon }) => (
   <header style={{
-    height: '60px',
+    height: '64px',
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: isDesktop ? '0 36px' : '0 16px',
-    background: theme === 'light' ? 'rgba(238,243,252,0.82)' : 'rgba(4,8,16,0.82)',
+    background: theme === 'light' ? 'rgba(238,243,252,0.85)' : 'rgba(4,8,20,0.88)',
     backdropFilter: 'blur(24px)',
     WebkitBackdropFilter: 'blur(24px)',
-    borderBottom: theme === 'light' ? '1px solid rgba(255,255,255,0.7)' : '1px solid rgba(255,255,255,0.06)',
-    boxShadow: theme === 'light' ? 'inset 0 -1px 0 rgba(255,255,255,0.5)' : 'none',
-    position: 'sticky', top: 0, zIndex: 100,
+    borderBottom: theme === 'light' ? '1px solid rgba(255,255,255,0.75)' : '1px solid rgba(59,130,196,0.1)',
+    boxShadow: theme === 'light'
+      ? 'inset 0 -1px 0 rgba(255,255,255,0.5), 0 4px 20px rgba(100,140,220,0.06)'
+      : '0 4px 24px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(59,130,196,0.06)',
+    position: 'sticky', top: 0, zIndex: 100, flexShrink: 0,
   }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <div style={{
-        width: '32px', height: '32px', borderRadius: RADIUS.sm,
-        background: 'linear-gradient(135deg, #1E3A5F 0%, #3B82C4 100%)',
+        width: '36px', height: '36px', borderRadius: '11px',
+        background: 'linear-gradient(135deg, #0A1929 0%, #1A3A5C 50%, #3B82C4 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 0 14px rgba(59,130,196,0.35), inset 0 1px 0 rgba(255,255,255,0.1)',
+        border: '1px solid rgba(96,165,250,0.2)',
       }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-          <path d="M2 17l10 5 10-5"/>
-          <path d="M2 12l10 5 10-5"/>
-        </svg>
+        <HoopLogoSVG />
       </div>
       <span style={{ fontSize: TYPE.md, fontWeight: '800', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '-0.3px' }}>Hoop</span>
     </div>
@@ -159,7 +170,15 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
       )}
       <button
         onClick={onToggleTheme}
-        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(91,155,213,0.2)', borderRadius: '50%', width: '34px', height: '34px', cursor: 'pointer', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{
+          background: theme === 'light' ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.06)',
+          backdropFilter: 'blur(10px)',
+          border: theme === 'light' ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(96,165,250,0.15)',
+          borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer',
+          color: theme === 'light' ? 'rgba(30,60,120,0.7)' : 'rgba(255,255,255,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: theme === 'light' ? 'inset 0 1px 0 rgba(255,255,255,0.9)' : '0 0 10px rgba(59,130,196,0.1)',
+        }}
       >
         {theme === 'light' ? <MoonIcon /> : <SunIcon />}
       </button>
