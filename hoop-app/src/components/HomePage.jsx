@@ -109,6 +109,7 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
     if (!force && GLOBAL_HOME_CACHE[cacheKey]) {
       setTodayData(GLOBAL_HOME_CACHE[cacheKey]);
       setLoading(false);
+      return;
     }
     try {
       const [rekapan, act] = await Promise.all([
@@ -126,7 +127,7 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
 
   useEffect(() => {
     fetchHome();
-    pollRef.current = setInterval(() => fetchHome(true), 30000);
+    pollRef.current = setInterval(() => fetchHome(true), 15000);
     return () => clearInterval(pollRef.current);
   }, [fetchHome]);
 
