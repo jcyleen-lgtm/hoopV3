@@ -1,12 +1,19 @@
 import React from 'react';
-import { TYPE, RADIUS } from '../theme';
+import { TYPE, RADIUS, glassCard } from '../theme';
 
-const RankCard = ({ rows, colors, rankStyle, barColor }) => {
+const RankCard = ({ rows, colors, rankStyle, barColor, theme }) => {
+  const isLight = theme === 'light';
+  const card = glassCard(theme);
   const max   = rows[0]?.total || 1;
   const grand = rows.reduce((s, r) => s + r.total, 0) || 1;
 
   return (
-    <div style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: RADIUS.lg, overflow: 'hidden' }}>
+    <div style={{
+      ...card,
+      borderRadius: RADIUS.lg, overflow: 'hidden',
+      backdropFilter: isLight ? 'blur(20px)' : 'none',
+      WebkitBackdropFilter: isLight ? 'blur(20px)' : 'none',
+    }}>
       <div style={{ padding: '18px 20px 10px', fontSize: TYPE.xs, fontWeight: '600', color: colors.subText }}>
         STAFF RANKING
       </div>
@@ -15,7 +22,7 @@ const RankCard = ({ rows, colors, rankStyle, barColor }) => {
         const pct = Math.round((item.total / max) * 100);
         const pctOfTotal = ((item.total / grand) * 100).toFixed(1);
         return (
-          <div key={i} style={{ padding: '11px 20px', borderTop: `1px solid ${colors.border}`, display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div key={i} style={{ padding: '11px 20px', borderTop: `1px solid ${colors.borderSub || colors.border}`, display: 'flex', alignItems: 'center', gap: '12px' }}>
             {/* Rank badge */}
             <div style={{ width: '28px', height: '28px', borderRadius: RADIUS.sm, background: rs.bg, color: rs.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: TYPE.sm, fontWeight: '700', flexShrink: 0 }}>
               {i + 1}

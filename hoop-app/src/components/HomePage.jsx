@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { callScript } from '../api';
-import { NAVY, FONT, RADIUS, TYPE } from '../theme';
+import { NAVY, FONT, RADIUS, TYPE, glassCard } from '../theme';
 
 const GLOBAL_HOME_CACHE = {};
 
@@ -97,7 +97,8 @@ const DesktopGrid = ({ children }) => (
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════
-const HomePage = ({ user, isDesktop, onNavigate }) => {
+const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
+  const isLight = theme === 'light';
   const [todayData, setTodayData] = useState(null);
   const [activity,  setActivity]  = useState([]);
   const [loading,   setLoading]   = useState(true);
@@ -176,15 +177,15 @@ const HomePage = ({ user, isDesktop, onNavigate }) => {
   const Greeting = () => (
     <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
       <div>
-        <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(148,185,230,0.3)', marginBottom: '4px' }}>
+        <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginBottom: '4px' }}>
           {new Date().getHours() < 12 ? 'Selamat pagi' : new Date().getHours() < 17 ? 'Selamat siang' : 'Selamat malam'}
         </div>
-        <div style={{ fontSize: isDesktop ? '26px' : '22px', fontWeight: '900', color: '#fff', letterSpacing: '-0.6px', lineHeight: 1 }}>
+        <div style={{ fontSize: isDesktop ? '26px' : '22px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.6px', lineHeight: 1 }}>
           {user?.name || 'Admin'}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
-          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)' }} />
-          <span style={{ fontSize: '11px', color: 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
+          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLight ? '#16A34A' : '#22C55E', boxShadow: isLight ? '0 0 10px rgba(22,163,74,0.8)' : '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)' }} />
+          <span style={{ fontSize: '11px', color: isLight ? 'rgba(30,60,120,0.45)' : 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
         </div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
@@ -205,43 +206,44 @@ const HomePage = ({ user, isDesktop, onNavigate }) => {
 
   const KpiSection = () => (
     <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
-      <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(148,185,230,0.22)', marginBottom: '12px', paddingLeft: isDesktop ? '0' : '0' }}>
+      <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.3)' : 'rgba(148,185,230,0.22)', marginBottom: '12px' }}>
         Operasional Hari Ini
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         {kpis.map((k, i) => (
           <div key={i} style={{
-            background: 'rgba(8,18,32,0.95)',
-            border: k.accent === '#3B82C4' ? '1px solid rgba(59,130,196,0.18)' :
-                    k.accent === '#22C55E' ? '1px solid rgba(34,197,94,0.15)' :
-                    k.accent === '#F59E0B' ? '1px solid rgba(245,158,11,0.15)' :
-                                             '1px solid rgba(168,85,247,0.15)',
+            background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.95)',
+            backdropFilter: isLight ? 'blur(20px)' : 'none',
+            WebkitBackdropFilter: isLight ? 'blur(20px)' : 'none',
+            border: `1px solid rgba(${k.rgb},${isLight ? '0.22' : '0.15'})`,
             borderRadius: '20px',
             padding: '16px 15px 14px',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: `0 0 28px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(${k.rgb},0.1)`,
+            boxShadow: isLight
+              ? `0 8px 24px rgba(100,140,220,0.1), 0 0 20px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(255,255,255,0.95)`
+              : `0 0 28px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(${k.rgb},0.08)`,
           }}>
             {/* Corner glow */}
             <div style={{ position: 'absolute', width: '80px', height: '80px', borderRadius: '50%', background: `radial-gradient(circle,rgba(${k.rgb},0.2) 0%,transparent 70%)`, top: '-20px', right: '-20px', pointerEvents: 'none' }} />
             {/* Top accent line */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1.5px', background: `linear-gradient(90deg,rgba(${k.rgb},0.9),rgba(${k.rgb},0))`, borderRadius: '20px 20px 0 0' }} />
 
-            <div style={{ fontSize: '9px', color: 'rgba(148,185,230,0.35)', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '7px' }}>
+            <div style={{ fontSize: '9px', color: isLight ? 'rgba(30,60,120,0.4)' : 'rgba(148,185,230,0.35)', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '7px' }}>
               {k.label}
             </div>
 
             {k.nameVal != null ? (
               <>
-                <div style={{ fontSize: '20px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px', lineHeight: 1, marginTop: '4px' }}>{loading ? '—' : k.nameVal}</div>
+                <div style={{ fontSize: '20px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.5px', lineHeight: 1, marginTop: '4px' }}>{loading ? '—' : k.nameVal}</div>
                 <div style={{ fontSize: '11px', color: `rgba(${k.rgb},0.7)`, marginTop: '5px', fontWeight: '600' }}>{k.subVal}</div>
                 <div style={{ fontSize: '10px', color: 'rgba(148,185,230,0.2)', marginTop: '3px' }}>🥇 #1 ranking</div>
               </>
             ) : (
               <>
-                <div style={{ fontSize: '30px', fontWeight: '900', color: '#fff', letterSpacing: '-1.5px', lineHeight: 1 }}>
+                <div style={{ fontSize: '30px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-1.5px', lineHeight: 1 }}>
                   {loading ? '—' : <AnimCounter target={k.value} />}
-                  <span style={{ fontSize: '12px', fontWeight: '400', color: 'rgba(148,185,230,0.3)', marginLeft: '3px' }}>{k.unit}</span>
+                  <span style={{ fontSize: '12px', fontWeight: '400', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginLeft: '3px' }}>{k.unit}</span>
                 </div>
                 {k.extra}
               </>
@@ -258,7 +260,7 @@ const HomePage = ({ user, isDesktop, onNavigate }) => {
         <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(148,185,230,0.22)' }}>
           Staff Performance
         </div>
-        <span onClick={() => onNavigate('dashboard')} style={{ fontSize: '11px', color: 'rgba(59,130,196,0.6)', fontWeight: '600', cursor: 'pointer' }}>
+        <span onClick={() => onNavigate('dashboard')} style={{ fontSize: '11px', color: isLight ? 'rgba(59,130,196,0.8)' : 'rgba(59,130,196,0.6)', fontWeight: '600', cursor: 'pointer' }}>
           Lihat semua →
         </span>
       </div>
@@ -275,13 +277,15 @@ const HomePage = ({ user, isDesktop, onNavigate }) => {
             <div key={i} style={{
               minWidth: isDesktop ? '0' : '110px',
               flex: isDesktop ? '1 1 140px' : '0 0 auto',
-              background: 'rgba(8,18,32,0.95)',
+              background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.95)',
+              backdropFilter: isLight ? 'blur(16px)' : 'none',
+              WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none',
               border: rs.border,
               borderRadius: '18px',
               padding: '14px 12px',
               position: 'relative',
               overflow: 'hidden',
-              boxShadow: `0 0 20px ${rs.glow}, inset 0 1px 0 ${rs.glow}`,
+              boxShadow: isLight ? `0 6px 20px rgba(100,140,220,0.1), 0 0 16px ${rs.glow}, inset 0 1px 0 rgba(255,255,255,0.95)` : `0 0 20px ${rs.glow}, inset 0 1px 0 ${rs.glow}`,
               flexShrink: 0,
             }}>
               <div style={{ position: 'absolute', width: '60px', height: '60px', borderRadius: '50%', background: `radial-gradient(circle,${rs.glow} 0%,transparent 70%)`, top: '-15px', right: '-15px', pointerEvents: 'none' }} />
@@ -289,9 +293,9 @@ const HomePage = ({ user, isDesktop, onNavigate }) => {
                 {r.nama.slice(0,2)}
                 <div style={{ position: 'absolute', bottom: 0, right: 0, width: '9px', height: '9px', borderRadius: '50%', background: '#22C55E', border: '2px solid #040810', boxShadow: '0 0 8px #22C55E' }} />
               </div>
-              <div style={{ fontSize: '11px', fontWeight: '700', color: '#fff', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.nama}</div>
-              <div style={{ fontSize: '20px', fontWeight: '900', color: '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>
-                {r.total.toLocaleString('id-ID')}<span style={{ fontSize: '9px', color: 'rgba(148,185,230,0.3)', marginLeft: '2px' }}>pcs</span>
+              <div style={{ fontSize: '11px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.nama}</div>
+              <div style={{ fontSize: '20px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>
+                {r.total.toLocaleString('id-ID')}<span style={{ fontSize: '9px', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginLeft: '2px' }}>pcs</span>
               </div>
               <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${pct}%`, background: rs.line, borderRadius: '2px', boxShadow: `0 0 8px ${rs.lineGlow}` }} />
@@ -318,13 +322,13 @@ const HomePage = ({ user, isDesktop, onNavigate }) => {
         </div>
       </div>
 
-      <div style={{ background: 'rgba(8,18,32,0.8)', border: '1px solid rgba(59,130,196,0.08)', borderRadius: '16px', overflow: 'hidden' }}>
+      <div style={{ background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.8)', backdropFilter: isLight ? 'blur(16px)' : 'none', WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none', border: isLight ? '1px solid rgba(255,255,255,0.75)' : '1px solid rgba(59,130,196,0.08)', borderRadius: '16px', overflow: 'hidden', boxShadow: isLight ? '0 6px 20px rgba(100,140,220,0.08), inset 0 1px 0 rgba(255,255,255,0.95)' : 'none' }}>
         {loading ? (
           [1,2,3].map(i => (
             <div key={i} style={{ height: '52px', borderBottom: '1px solid rgba(255,255,255,0.03)', margin: '0 16px' }} />
           ))
         ) : activity.length === 0 ? (
-          <div style={{ padding: '24px 16px', textAlign: 'center', fontSize: '12px', color: 'rgba(148,185,230,0.3)' }}>
+          <div style={{ padding: '24px 16px', textAlign: 'center', fontSize: '12px', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)' }}>
             Belum ada aktivitas hari ini
           </div>
         ) : activity.map((item, i) => {
@@ -333,13 +337,13 @@ const HomePage = ({ user, isDesktop, onNavigate }) => {
             <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '11px 16px', borderBottom: i < activity.length - 1 ? '1px solid rgba(255,255,255,0.035)' : 'none' }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor, boxShadow: `0 0 8px ${dotColor}`, flexShrink: 0, marginTop: '5px' }} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '12px', color: 'rgba(148,185,230,0.65)', lineHeight: 1.5 }}>
-                  <span style={{ color: '#E8F4FF', fontWeight: '600' }}>{item.nama}</span>
+                <div style={{ fontSize: '12px', color: isLight ? 'rgba(30,60,120,0.6)' : 'rgba(148,185,230,0.65)', lineHeight: 1.5 }}>
+                  <span style={{ color: isLight ? '#0D1F40' : '#E8F4FF', fontWeight: '600' }}>{item.nama}</span>
                   {' · '}{item.cam}
                   {' · scan '}
-                  <span style={{ color: '#E8F4FF', fontWeight: '600', fontFamily: 'monospace', fontSize: '11px' }}>{item.id}</span>
+                  <span style={{ color: isLight ? '#0D1F40' : '#E8F4FF', fontWeight: '600', fontFamily: 'monospace', fontSize: '11px' }}>{item.id}</span>
                 </div>
-                <div style={{ fontSize: '10px', color: 'rgba(148,185,230,0.2)', marginTop: '2px' }}>{timeAgo(item.time)}</div>
+                <div style={{ fontSize: '10px', color: isLight ? 'rgba(30,60,120,0.3)' : 'rgba(148,185,230,0.2)', marginTop: '2px' }}>{timeAgo(item.time)}</div>
               </div>
             </div>
           );

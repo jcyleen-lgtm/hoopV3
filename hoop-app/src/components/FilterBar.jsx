@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
-import { TYPE, RADIUS, FONT } from '../theme';
+import { TYPE, RADIUS, FONT, glassCard } from '../theme';
 import { callScript } from '../api';
 
 const FilterIcon   = ({ color }) => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
@@ -31,7 +31,9 @@ const FilterBar = ({
   showMonthMenu, setShowMonthMenu,
   dateRange, setDateRange,
   fetchData,
+  theme,
 }) => {
+  const isLight = theme === 'light';
   const menuRef    = useRef(null);
   const prefetchRef = useRef(null);
 
@@ -119,11 +121,9 @@ const FilterBar = ({
 
   return (
     <div style={{
-      background:'rgba(10,25,41,0.55)',
-      backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
-      border:'1px solid rgba(91,155,213,0.15)',
+      ...glassCard(theme),
       borderRadius:RADIUS.lg, padding:'12px 14px', marginBottom:'16px',
-      boxShadow:'inset 0 1px 0 rgba(255,255,255,0.04)',
+      backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
     }}>
       <div style={{ display:'flex', alignItems:'center', gap:'6px', flexWrap:'wrap' }}>
         <FilterIcon color="rgba(181,212,244,0.4)" />
@@ -154,16 +154,16 @@ const FilterBar = ({
           {showMonthMenu && (
             <div style={{
               position:'absolute', top:'calc(100% + 6px)', left:0,
-              background:'rgba(5,14,28,0.97)',
+              background: isLight ? 'rgba(238,243,252,0.92)' : 'rgba(5,14,28,0.97)',
               backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
-              border:'1px solid rgba(91,155,213,0.2)',
+              border: isLight ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(91,155,213,0.2)',
               borderRadius:RADIUS.md, padding:'12px',
               zIndex:300, minWidth:'236px',
-              boxShadow:'0 16px 48px rgba(0,0,0,0.7)',
+              boxShadow: isLight ? '0 16px 48px rgba(100,140,220,0.2), inset 0 1px 0 rgba(255,255,255,0.9)' : '0 16px 48px rgba(0,0,0,0.7)',
             }}>
               <div style={{
                 fontSize:'10px', fontWeight:'700',
-                color:'rgba(181,212,244,0.35)',
+                color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(181,212,244,0.35)',
                 letterSpacing:'.08em', marginBottom:'8px',
               }}>
                 PILIH BULAN
@@ -205,13 +205,13 @@ const FilterBar = ({
           <span style={{ fontSize:TYPE.xs, color:'rgba(181,212,244,0.45)', whiteSpace:'nowrap' }}>Dari</span>
           <input type="date" value={dateRange.start}
             onChange={e => handleStartChange(e.target.value)}
-            style={dateInputStyle}
+            style={dateInputStyle(isLight)}
           />
           <span style={{ fontSize:TYPE.xs, color:'rgba(181,212,244,0.45)', whiteSpace:'nowrap' }}>s/d</span>
           <input type="date" value={dateRange.end}
             min={dateRange.start}
             onChange={e => handleEndChange(e.target.value)}
-            style={dateInputStyle}
+            style={dateInputStyle(isLight)}
           />
           <button
             onClick={handleCustomApply}
@@ -235,14 +235,17 @@ const FilterBar = ({
   );
 };
 
-const dateInputStyle = {
+const dateInputStyle = (isLight) => ({
   height:'34px', padding:'0 10px',
-  background:'rgba(5,14,28,0.6)',
-  border:'1px solid rgba(91,155,213,0.2)',
+  background: isLight ? 'rgba(255,255,255,0.6)' : 'rgba(5,14,28,0.6)',
+  backdropFilter: isLight ? 'blur(10px)' : 'none',
+  border: isLight ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(91,155,213,0.2)',
   borderRadius:RADIUS.sm,
-  fontSize:TYPE.sm, color:'#E8F0FA',
+  fontSize:TYPE.sm,
+  color: isLight ? '#0D1F40' : '#E8F0FA',
   outline:'none', fontFamily:FONT,
-  colorScheme:'dark',
-};
+  colorScheme: isLight ? 'light' : 'dark',
+  boxShadow: isLight ? 'inset 0 1px 0 rgba(255,255,255,0.9)' : 'none',
+});
 
 export default FilterBar;

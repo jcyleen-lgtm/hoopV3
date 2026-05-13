@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from 'recharts';
-import { TYPE, RADIUS } from '../theme';
+import { TYPE, RADIUS, glassCard } from '../theme';
 
 const COLORS = ['#3B82C4','#2D5A8E','#5B9BD5','#1A3A5C','#85B7E8','#60A5FA','#1E40AF','#93C5FD','#1D4ED8','#BFDBFE'];
 
@@ -26,14 +26,23 @@ const PctLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
   );
 };
 
-const ChartCard = ({ rows, colors, isDesktop }) => {
+const ChartCard = ({ rows, colors, isDesktop, theme }) => {
+  const isLight = theme === 'light';
+  const card = glassCard(theme, '59,130,196');
   const [activeIdx, setActiveIdx] = useState(null);
   const top    = rows.slice(0, 10);
   const total  = rows.reduce((s, r) => s + r.total, 0);
   const active = activeIdx !== null ? top[activeIdx] : null;
 
   return (
-    <div style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: RADIUS.lg, padding: '18px 16px' }}>
+    <div style={{
+      ...card,
+      borderRadius: RADIUS.lg, padding: '18px 16px',
+      position: 'relative', overflow: 'hidden',
+      backdropFilter: isLight ? 'blur(20px)' : 'none',
+      WebkitBackdropFilter: isLight ? 'blur(20px)' : 'none',
+    }}>
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1.5px', background: 'linear-gradient(90deg,rgba(59,130,196,0.7),rgba(59,130,196,0))', borderRadius: `${RADIUS.lg} ${RADIUS.lg} 0 0` }} />
       <div style={{ fontSize: TYPE.xs, fontWeight: '600', letterSpacing: '.08em', textTransform: 'uppercase', color: colors.subText, marginBottom: '4px' }}>
         Performance Chart
       </div>

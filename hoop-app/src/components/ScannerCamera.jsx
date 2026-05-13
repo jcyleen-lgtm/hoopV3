@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useScanner } from '../hooks/useScanner';
-import { NAVY, RADIUS, TYPE, FONT } from '../theme';
+import { NAVY, RADIUS, TYPE, FONT, glassCard } from '../theme';
 
 const ICONS = {
   CheckCircle:   ({ color, size }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
@@ -15,32 +15,30 @@ const ICONS = {
 };
 
 const STATUS_MAP = {
-  'READY':      { label: 'Siap Scan',  color: '#F59E0B', icon: 'Clock',         bg: 'rgba(245,158,11,0.1)'  },
-  'SAVING...':  { label: 'Menyimpan…', color: '#5B9BD5', icon: 'Loader',        bg: 'rgba(91,155,213,0.1)'  },
-  'SUCCESS!':   { label: 'Berhasil!',  color: '#22C55E', icon: 'CheckCircle',   bg: 'rgba(34,197,94,0.12)'  },
-  'DUPLICATE!': { label: 'Duplicate!', color: '#F59E0B', icon: 'AlertTriangle', bg: 'rgba(245,158,11,0.12)' },
-  'ERROR!':     { label: 'Error',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.1)'   },
-  'GAGAL!':     { label: 'Gagal',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.1)'   },
+  'READY':      { label: 'Siap Scan',  color: '#F59E0B', icon: 'Clock',         bg: 'rgba(245,158,11,0.08)'  },
+  'SAVING...':  { label: 'Menyimpan…', color: '#5B9BD5', icon: 'Loader',        bg: 'rgba(91,155,213,0.08)'  },
+  'SUCCESS!':   { label: 'Berhasil!',  color: '#22C55E', icon: 'CheckCircle',   bg: 'rgba(34,197,94,0.08)'   },
+  'DUPLICATE!': { label: 'Duplicate!', color: '#F59E0B', icon: 'AlertTriangle', bg: 'rgba(245,158,11,0.08)'  },
+  'ERROR!':     { label: 'Error',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.08)'   },
+  'GAGAL!':     { label: 'Gagal',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.08)'   },
 };
-const getCfg = (s) => STATUS_MAP[s] ?? { label: s, color: '#EF4444', icon: 'AlertCircle', bg: 'rgba(239,68,68,0.1)' };
+const getCfg = (s) => STATUS_MAP[s] ?? { label: s, color: '#EF4444', icon: 'AlertCircle', bg: 'rgba(239,68,68,0.08)' };
 
 const CAM_OPTIONS = ['CAM 1', 'CAM 2', 'CAM 3', 'CAM 4', 'CAM 5', 'CAM 6'];
 
-const ScannerCamera = ({ user, active, colors, isDesktop }) => {
+const ScannerCamera = ({ user, active, colors, isDesktop, theme }) => {
   const [mode, setMode]         = useState('camera');
   const [cam, setCam]           = useState(() => localStorage.getItem('hoop_cam') || '');
   const [manualInput, setManualInput] = useState('');
   const manualRef = useRef(null);
+  const isLight = theme === 'light';
 
   const { status, lastScan, scanHistory, cameraError, sendScanData } =
     useScanner({ user, cam, active, mode });
 
   useEffect(() => { if (cam) localStorage.setItem('hoop_cam', cam); }, [cam]);
-
   useEffect(() => {
-    if (mode === 'manual' && manualRef.current) {
-      setTimeout(() => manualRef.current?.focus(), 200);
-    }
+    if (mode === 'manual' && manualRef.current) setTimeout(() => manualRef.current?.focus(), 200);
   }, [mode]);
 
   const handleManualSubmit = () => {
@@ -50,7 +48,7 @@ const ScannerCamera = ({ user, active, colors, isDesktop }) => {
     if (manualRef.current) manualRef.current.focus();
   };
 
-  if (!cam) return <CamPicker colors={colors} onSelect={setCam} />;
+  if (!cam) return <CamPicker colors={colors} onSelect={setCam} isLight={isLight} theme={theme} />;
 
   const cfg  = getCfg(status);
   const Icon = ICONS[cfg.icon] || ICONS.AlertCircle;
@@ -60,108 +58,127 @@ const ScannerCamera = ({ user, active, colors, isDesktop }) => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
         <div>
-          <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} />
+          <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} isLight={isLight} theme={theme} />
           {mode === 'camera'
-            ? <CameraBox cameraError={cameraError} colors={colors} />
-            : <ManualBox value={manualInput} onChange={setManualInput} onKey={(e) => e.key === 'Enter' && handleManualSubmit()} onSubmit={handleManualSubmit} inputRef={manualRef} colors={colors} busy={busy} />
+            ? <CameraBox cameraError={cameraError} colors={colors} isLight={isLight} theme={theme} />
+            : <ManualBox value={manualInput} onChange={setManualInput} onKey={(e) => e.key === 'Enter' && handleManualSubmit()} onSubmit={handleManualSubmit} inputRef={manualRef} colors={colors} busy={busy} isLight={isLight} theme={theme} />
           }
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <StatusBanner cfg={cfg} Icon={Icon} lastScan={lastScan} />
-          <HistoryList history={scanHistory} colors={colors} />
+          <StatusBanner cfg={cfg} Icon={Icon} lastScan={lastScan} isLight={isLight} theme={theme} />
+          <HistoryList history={scanHistory} colors={colors} isLight={isLight} theme={theme} />
         </div>
       </div>
     );
   }
 
-  // ── MOBILE: everything fits on screen, no scroll needed ──────────
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '480px', margin: '0 auto' }}>
-      <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} />
-
-      {/* Status banner — always visible at top */}
-      <StatusBanner cfg={cfg} Icon={Icon} lastScan={lastScan} compact />
-
-      {/* Camera / manual — shorter height on mobile */}
+      <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} isLight={isLight} theme={theme} />
+      <StatusBanner cfg={cfg} Icon={Icon} lastScan={lastScan} compact isLight={isLight} theme={theme} />
       {mode === 'camera'
-        ? <CameraBox cameraError={cameraError} colors={colors} compact />
-        : <ManualBox value={manualInput} onChange={setManualInput} onKey={(e) => e.key === 'Enter' && handleManualSubmit()} onSubmit={handleManualSubmit} inputRef={manualRef} colors={colors} busy={busy} compact />
+        ? <CameraBox cameraError={cameraError} colors={colors} compact isLight={isLight} theme={theme} />
+        : <ManualBox value={manualInput} onChange={setManualInput} onKey={(e) => e.key === 'Enter' && handleManualSubmit()} onSubmit={handleManualSubmit} inputRef={manualRef} colors={colors} busy={busy} compact isLight={isLight} theme={theme} />
       }
-
-      {/* Recent scans — compact list */}
-      {scanHistory.length > 0 && <HistoryList history={scanHistory} colors={colors} compact />}
+      {scanHistory.length > 0 && <HistoryList history={scanHistory} colors={colors} compact isLight={isLight} theme={theme} />}
     </div>
   );
 };
 
-// ── Sub-components ────────────────────────────────────────────────
+const ControlBar = ({ cam, setCam, mode, setMode, colors, isLight, theme }) => {
+  const card = glassCard(theme);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
+      <button
+        onClick={() => setCam('')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          ...glassCard(theme, '59,130,196'),
+          borderRadius: RADIUS.pill, padding: '6px 14px',
+          color: colors.text, fontSize: TYPE.sm, fontWeight: '700',
+          cursor: 'pointer', fontFamily: FONT,
+          backdropFilter: isLight ? 'blur(12px)' : 'none',
+          WebkitBackdropFilter: isLight ? 'blur(12px)' : 'none',
+        }}
+      >
+        <ICONS.Camera color={colors.brand} size={13} />
+        <span style={{ color: colors.brand }}>{cam}</span>
+        <span style={{ opacity: 0.4, fontSize: '10px', color: colors.text }}>▼</span>
+      </button>
 
-const ControlBar = ({ cam, setCam, mode, setMode, colors }) => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
-    <button
-      onClick={() => setCam('')}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '6px',
-        background: NAVY[900], border: `1.5px solid ${NAVY[700]}`,
-        borderRadius: RADIUS.pill, padding: '5px 12px',
-        color: '#fff', fontSize: TYPE.sm, fontWeight: '700',
-        cursor: 'pointer', fontFamily: FONT,
-      }}
-    >
-      <ICONS.Camera color="#5B9BD5" size={13} />
-      {cam}
-      <span style={{ opacity: 0.5, fontSize: '10px' }}>▼</span>
-    </button>
-
-    <div style={{ display: 'flex', gap: '3px', background: colors.surface, borderRadius: RADIUS.pill, padding: '3px', border: `1px solid ${colors.border}` }}>
-      {[{ key: 'camera', Icon: ICONS.Camera, label: 'Kamera' }, { key: 'manual', Icon: ICONS.Keyboard, label: 'Scanner' }].map(({ key, Icon, label }) => {
-        const active = mode === key;
-        return (
-          <button key={key} onClick={() => setMode(key)} style={{
-            display: 'flex', alignItems: 'center', gap: '5px',
-            padding: '5px 12px', borderRadius: RADIUS.pill,
-            background: active ? NAVY[900] : 'transparent',
-            color: active ? '#fff' : colors.subText,
-            border: 'none', cursor: 'pointer',
-            fontSize: TYPE.sm, fontWeight: active ? '700' : '500',
-            fontFamily: FONT, transition: 'all 0.15s',
-          }}>
-            <Icon color={active ? '#5B9BD5' : colors.subText} size={13} />
-            {label}
-          </button>
-        );
-      })}
-    </div>
-  </div>
-);
-
-const StatusBanner = ({ cfg, Icon, lastScan, compact }) => (
-  <div style={{
-    display: 'flex', alignItems: 'center', gap: '10px',
-    background: cfg.bg, border: `1.5px solid ${cfg.color}40`,
-    borderRadius: RADIUS.md, padding: compact ? '8px 12px' : '12px 16px',
-    borderLeft: `3px solid ${cfg.color}`,
-    minHeight: compact ? '44px' : '56px',
-    transition: 'all 0.2s ease',
-  }}>
-    <Icon size={compact ? 16 : 20} color={cfg.color} />
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontSize: compact ? TYPE.sm : TYPE.base, fontWeight: '800', color: cfg.color, letterSpacing: '0.05em' }}>
-        {cfg.label.toUpperCase()}
+      <div style={{
+        display: 'flex', gap: '3px',
+        ...glassCard(theme),
+        borderRadius: RADIUS.pill, padding: '3px',
+        backdropFilter: isLight ? 'blur(12px)' : 'none',
+        WebkitBackdropFilter: isLight ? 'blur(12px)' : 'none',
+      }}>
+        {[{ key: 'camera', Icon: ICONS.Camera, label: 'Kamera' }, { key: 'manual', Icon: ICONS.Keyboard, label: 'Scanner' }].map(({ key, Icon, label }) => {
+          const active = mode === key;
+          return (
+            <button key={key} onClick={() => setMode(key)} style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: '5px 12px', borderRadius: RADIUS.pill,
+              background: active
+                ? isLight ? 'rgba(59,130,196,0.15)' : NAVY[800]
+                : 'transparent',
+              color: active ? colors.brand : colors.subText,
+              border: active ? `1px solid rgba(59,130,196,${isLight ? '0.2' : '0.3'})` : '1px solid transparent',
+              boxShadow: active ? `0 0 10px rgba(59,130,196,${isLight ? '0.12' : '0.2'})` : 'none',
+              cursor: 'pointer',
+              fontSize: TYPE.sm, fontWeight: active ? '700' : '500',
+              fontFamily: FONT, transition: 'all 0.15s',
+            }}>
+              <Icon color={active ? colors.brand : colors.subText} size={13} />
+              {label}
+            </button>
+          );
+        })}
       </div>
-      {lastScan && (
-        <div style={{ fontSize: TYPE.xs, color: cfg.color, opacity: 0.8, marginTop: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {lastScan}
-        </div>
-      )}
     </div>
-  </div>
-);
+  );
+};
 
-const CameraBox = ({ cameraError, colors, compact }) => (
+const StatusBanner = ({ cfg, Icon, lastScan, compact, isLight, theme }) => {
+  const colorRgb = cfg.color === '#22C55E' ? '34,197,94'
+    : cfg.color === '#F59E0B' ? '245,158,11'
+    : cfg.color === '#5B9BD5' ? '91,155,213'
+    : '239,68,68';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '10px',
+      background: isLight ? `rgba(255,255,255,0.55)` : cfg.bg,
+      backdropFilter: isLight ? 'blur(16px)' : 'none',
+      WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none',
+      border: `1px solid rgba(${colorRgb},${isLight ? '0.25' : '0.2'})`,
+      borderRadius: RADIUS.md,
+      padding: compact ? '8px 12px' : '12px 16px',
+      borderLeft: `3px solid ${cfg.color}`,
+      minHeight: compact ? '44px' : '56px',
+      transition: 'all 0.2s ease',
+      boxShadow: `0 0 16px rgba(${colorRgb},${isLight ? '0.1' : '0.08'})${isLight ? ', inset 0 1px 0 rgba(255,255,255,0.9)' : ''}`,
+    }}>
+      <Icon size={compact ? 16 : 20} color={cfg.color} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: compact ? TYPE.sm : TYPE.base, fontWeight: '800', color: cfg.color, letterSpacing: '0.05em', textShadow: `0 0 8px rgba(${colorRgb},0.4)` }}>
+          {cfg.label.toUpperCase()}
+        </div>
+        {lastScan && (
+          <div style={{ fontSize: TYPE.xs, color: cfg.color, opacity: 0.75, marginTop: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {lastScan}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const CameraBox = ({ cameraError, colors, compact, isLight, theme }) => (
   <div style={{
     width: '100%', borderRadius: RADIUS.lg, overflow: 'hidden',
-    backgroundColor: '#000', border: `1.5px solid ${colors.borderMid}`,
+    backgroundColor: '#000',
+    border: `1px solid rgba(59,130,196,${isLight ? '0.25' : '0.2'})`,
+    boxShadow: `0 0 20px rgba(59,130,196,${isLight ? '0.1' : '0.08'})`,
     position: 'relative', minHeight: compact ? '200px' : '260px',
   }}>
     <div id="reader" style={{ width: '100%' }} />
@@ -174,10 +191,13 @@ const CameraBox = ({ cameraError, colors, compact }) => (
   </div>
 );
 
-const ManualBox = ({ value, onChange, onKey, onSubmit, inputRef, colors, busy, compact }) => (
+const ManualBox = ({ value, onChange, onKey, onSubmit, inputRef, colors, busy, compact, isLight, theme }) => (
   <div style={{
-    borderRadius: RADIUS.lg, border: `1.5px solid ${colors.borderMid}`,
-    background: colors.card, minHeight: compact ? '100px' : '160px',
+    borderRadius: RADIUS.lg,
+    ...glassCard(theme, '59,130,196'),
+    backdropFilter: isLight ? 'blur(16px)' : 'none',
+    WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none',
+    minHeight: compact ? '100px' : '160px',
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     justifyContent: 'center', padding: '20px 16px', gap: '12px',
   }}>
@@ -192,19 +212,25 @@ const ManualBox = ({ value, onChange, onKey, onSubmit, inputRef, colors, busy, c
         placeholder="Nomor Pesanan…"
         style={{
           flex: 1, height: '44px', padding: '0 14px',
-          background: colors.surface, border: `1.5px solid ${colors.border}`,
+          background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.8)',
+          backdropFilter: isLight ? 'blur(10px)' : 'none',
+          border: `1px solid rgba(59,130,196,${isLight ? '0.2' : '0.15'})`,
           borderRadius: RADIUS.md, fontSize: TYPE.base,
           color: colors.text, fontFamily: FONT, outline: 'none',
           opacity: busy ? 0.6 : 1,
+          boxShadow: isLight ? 'inset 0 1px 0 rgba(255,255,255,0.8)' : 'none',
         }}
         autoComplete="off"
       />
       <button onClick={onSubmit} disabled={busy || !value.trim()} style={{
         height: '44px', padding: '0 14px',
-        background: value.trim() && !busy ? NAVY[700] : colors.surface,
-        border: `1.5px solid ${colors.border}`,
+        background: value.trim() && !busy
+          ? 'linear-gradient(135deg,#1A3A5C,#3B82C4)'
+          : isLight ? 'rgba(255,255,255,0.4)' : 'rgba(8,18,32,0.6)',
+        border: `1px solid rgba(59,130,196,${value.trim() && !busy ? '0.4' : '0.1'})`,
         borderRadius: RADIUS.md, cursor: busy || !value.trim() ? 'not-allowed' : 'pointer',
         display: 'flex', alignItems: 'center',
+        boxShadow: value.trim() && !busy ? '0 0 12px rgba(59,130,196,0.3)' : 'none',
       }}>
         <ICONS.Send color={value.trim() && !busy ? '#fff' : colors.subText} size={15} />
       </button>
@@ -212,10 +238,24 @@ const ManualBox = ({ value, onChange, onKey, onSubmit, inputRef, colors, busy, c
   </div>
 );
 
-const CamPicker = ({ colors, onSelect }) => (
-  <div style={{ maxWidth: '360px', margin: '32px auto', textAlign: 'center', background: colors.card, border: `1px solid ${colors.border}`, borderRadius: RADIUS.xl, padding: '32px 24px' }}>
-    <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: NAVY[900], margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <ICONS.Camera color="#5B9BD5" size={24} />
+const CamPicker = ({ colors, onSelect, isLight, theme }) => (
+  <div style={{
+    maxWidth: '360px', margin: '32px auto', textAlign: 'center',
+    ...glassCard(theme, '59,130,196'),
+    borderRadius: RADIUS.xl, padding: '32px 24px',
+    backdropFilter: isLight ? 'blur(20px)' : 'none',
+    WebkitBackdropFilter: isLight ? 'blur(20px)' : 'none',
+  }}>
+    {/* Top accent line */}
+    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1.5px', background: 'linear-gradient(90deg,rgba(59,130,196,0.7),rgba(59,130,196,0))', borderRadius: `${RADIUS.xl} ${RADIUS.xl} 0 0` }} />
+    <div style={{
+      width: '52px', height: '52px', borderRadius: '14px',
+      background: isLight ? 'rgba(59,130,196,0.1)' : NAVY[900],
+      border: `1px solid rgba(59,130,196,${isLight ? '0.2' : '0.2'})`,
+      margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: '0 0 16px rgba(59,130,196,0.15)',
+    }}>
+      <ICONS.Camera color={colors.brand} size={24} />
     </div>
     <h2 style={{ margin: '0 0 4px', fontSize: TYPE.lg, fontWeight: '800', color: colors.text }}>Pilih Kamera</h2>
     <p style={{ margin: '0 0 20px', fontSize: TYPE.sm, color: colors.subText }}>Pilih kamera CCTV kamu</p>
@@ -223,9 +263,13 @@ const CamPicker = ({ colors, onSelect }) => (
       {CAM_OPTIONS.map((c) => (
         <button key={c} onClick={() => onSelect(c)} style={{
           padding: '12px', borderRadius: RADIUS.md,
-          background: NAVY[900], border: `1.5px solid ${NAVY[700]}`,
-          color: '#fff', fontSize: TYPE.base, fontWeight: '700',
+          background: isLight ? 'rgba(255,255,255,0.6)' : NAVY[900],
+          backdropFilter: isLight ? 'blur(10px)' : 'none',
+          border: `1px solid rgba(59,130,196,${isLight ? '0.15' : '0.12'})`,
+          color: colors.text, fontSize: TYPE.base, fontWeight: '700',
           cursor: 'pointer', fontFamily: FONT,
+          boxShadow: isLight ? 'inset 0 1px 0 rgba(255,255,255,0.9)' : 'none',
+          transition: 'all 0.15s',
         }}>
           {c}
         </button>
@@ -234,17 +278,22 @@ const CamPicker = ({ colors, onSelect }) => (
   </div>
 );
 
-const HistoryList = ({ history, colors, compact }) => (
-  <div style={{ background: colors.card, border: `1px solid ${colors.border}`, borderRadius: RADIUS.md, overflow: 'hidden' }}>
+const HistoryList = ({ history, colors, compact, isLight, theme }) => (
+  <div style={{
+    ...glassCard(theme),
+    borderRadius: RADIUS.md, overflow: 'hidden',
+    backdropFilter: isLight ? 'blur(16px)' : 'none',
+    WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none',
+  }}>
     {history.slice(0, compact ? 4 : 10).map((item, i) => (
       <div key={i} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: compact ? '7px 12px' : '10px 16px',
-        borderBottom: i < Math.min(history.length, compact ? 4 : 10) - 1 ? `1px solid ${colors.border}` : 'none',
+        borderBottom: i < Math.min(history.length, compact ? 4 : 10) - 1 ? `1px solid ${colors.borderSub}` : 'none',
         animation: i === 0 ? 'fadeSlideIn .2s ease' : 'none',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: item.ok ? '#22C55E' : '#EF4444', flexShrink: 0 }} />
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: item.ok ? colors.success : colors.error, flexShrink: 0, boxShadow: `0 0 6px ${item.ok ? colors.success : colors.error}` }} />
           <span style={{ fontSize: TYPE.xs, color: colors.text, fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.id}</span>
         </div>
         <span style={{ fontSize: '10px', color: colors.subText, whiteSpace: 'nowrap', marginLeft: '8px' }}>{item.time}</span>

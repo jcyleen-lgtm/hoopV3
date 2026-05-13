@@ -54,7 +54,10 @@ const Sidebar = ({ user, page, theme, onNavigate, onToggleTheme, onLogout }) => 
             {active && (
               <div style={{
                 position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                width: '3px', height: '22px', background: NAVY[600], borderRadius: '0 3px 3px 0',
+                width: '3px', height: '22px',
+                background: 'linear-gradient(180deg,#3B82C4,#1A3A5C)',
+                borderRadius: '0 3px 3px 0',
+                boxShadow: '0 0 8px rgba(59,130,196,0.8)',
               }} />
             )}
             <button
@@ -62,7 +65,9 @@ const Sidebar = ({ user, page, theme, onNavigate, onToggleTheme, onLogout }) => 
               title={title}
               style={{
                 width: '44px', height: '44px', borderRadius: RADIUS.sm, border: 'none',
-                background: active ? 'rgba(59,130,196,0.15)' : 'none',
+                background: active ? 'rgba(59,130,196,0.18)' : 'none',
+                boxShadow: active ? '0 0 16px rgba(59,130,196,0.15), inset 0 1px 0 rgba(255,255,255,0.06)' : 'none',
+                border: active ? '1px solid rgba(59,130,196,0.15)' : '1px solid transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', transition: 'background .15s',
               }}

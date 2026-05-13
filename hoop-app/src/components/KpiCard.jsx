@@ -1,5 +1,5 @@
 import React from 'react';
-import { TYPE, RADIUS } from '../theme';
+import { TYPE, RADIUS, glassCard } from '../theme';
 
 // Built-in inline icon shapes keyed by name
 const ICONS = {
@@ -27,20 +27,31 @@ const ICONS = {
   ),
 };
 
-const KpiCard = ({ icon, label, value, unit, accent, colors, small }) => {
+const KpiCard = ({ icon, label, value, unit, accent, colors, small, theme }) => {
   if (!colors) return null;
   const IconEl = icon && ICONS[icon] ? ICONS[icon](accent) : null;
+  const isLight = theme === 'light';
+  // derive rgb from accent color
+  const accentMap = { '#2D5A8E':'45,90,142', '#3B82C4':'59,130,196', '#6B7280':'107,114,128', '#D4AF37':'212,175,55' };
+  const accentRgb = accentMap[accent] || '59,130,196';
+  const card = glassCard(theme || 'dark', accentRgb);
 
   return (
     <div style={{
-      background: colors.card,
-      border: `1px solid ${colors.border}`,
+      ...card,
       borderRadius: RADIUS.lg,
       padding: '16px 18px',
-      borderTop: `3px solid ${accent}`,
+      position: 'relative',
+      overflow: 'hidden',
       flex: 1,
       minWidth: '150px',
+      backdropFilter: isLight ? 'blur(20px)' : 'none',
+      WebkitBackdropFilter: isLight ? 'blur(20px)' : 'none',
     }}>
+      {/* Top accent line */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1.5px', background: `linear-gradient(90deg,${accent},rgba(0,0,0,0))`, borderRadius: `${RADIUS.lg} ${RADIUS.lg} 0 0` }} />
+      {/* Corner glow */}
+      <div style={{ position: 'absolute', width: '70px', height: '70px', borderRadius: '50%', background: `radial-gradient(circle,rgba(${accentRgb},${isLight ? '0.18' : '0.15'}) 0%,transparent 70%)`, top: '-20px', right: '-20px', pointerEvents: 'none' }} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '8px' }}>
         {IconEl}
         <span style={{

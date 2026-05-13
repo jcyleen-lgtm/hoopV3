@@ -94,10 +94,10 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
         {/* Dynamic Page Content */}
         <div style={{ flex: 1, padding: contentPad() }}>
           {page === 'home' && (
-            <HomePage user={user} isDesktop={isDesktop} onNavigate={navigate} />
+            <HomePage user={user} isDesktop={isDesktop} onNavigate={navigate} theme={theme} />
           )}
           {page === 'scan' && (
-            <ScannerCamera user={user} active={page === 'scan'} colors={colors} isDesktop={isDesktop} />
+            <ScannerCamera user={user} active={page === 'scan'} colors={colors} isDesktop={isDesktop} theme={theme} />
           )}
           {page === 'produk' && (
             <ProductList colors={colors} isDesktop={isDesktop} />
@@ -118,7 +118,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
 
         {/* Bottom Navigation - Mobile Only */}
         {!isDesktop && (
-          <BottomNav page={page} colors={colors} onNavigate={navigate} />
+          <BottomNav page={page} colors={colors} onNavigate={navigate} theme={theme} />
         )}
       </main>
     </div>
@@ -131,10 +131,11 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
     height: '60px',
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: isDesktop ? '0 36px' : '0 16px',
-    background: 'rgba(9, 18, 30, 0.75)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    borderBottom: '1px solid rgba(255,255,255,0.07)',
+    background: theme === 'light' ? 'rgba(238,243,252,0.82)' : 'rgba(4,8,16,0.82)',
+    backdropFilter: 'blur(24px)',
+    WebkitBackdropFilter: 'blur(24px)',
+    borderBottom: theme === 'light' ? '1px solid rgba(255,255,255,0.7)' : '1px solid rgba(255,255,255,0.06)',
+    boxShadow: theme === 'light' ? 'inset 0 -1px 0 rgba(255,255,255,0.5)' : 'none',
     position: 'sticky', top: 0, zIndex: 100,
   }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -149,12 +150,12 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
           <path d="M2 12l10 5 10-5"/>
         </svg>
       </div>
-      <span style={{ fontSize: TYPE.md, fontWeight: '800', color: '#fff', letterSpacing: '-0.3px' }}>HoopV3</span>
+      <span style={{ fontSize: TYPE.md, fontWeight: '800', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '-0.3px' }}>HoopV3</span>
     </div>
 
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
       {isDesktop && (
-        <span style={{ fontSize: TYPE.sm, fontWeight: '500', color: colors.text }}>{user?.name}</span>
+        <span style={{ fontSize: TYPE.sm, fontWeight: '600', color: colors.text }}>{user?.name}</span>
       )}
       <button
         onClick={onToggleTheme}
@@ -182,6 +183,7 @@ const GlobalStyles = ({ colors }) => (
       font-family: 'Inter', sans-serif;
       -webkit-font-smoothing: antialiased;
     }
+    @keyframes hpBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
     #reader video { border-radius: 14px !important; object-fit: cover; }
     #reader { border-radius: 14px !important; overflow: hidden !important; }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

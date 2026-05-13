@@ -26,12 +26,21 @@ const Shimmer = ({ w = '100%', h = '18px', r = '8px' }) => (
   }} />
 );
 
-const SkeletonDashboard = ({ isDesktop, colors }) => (
+const SkeletonDashboard = ({ isDesktop, colors, theme }) => {
+  const isLight = theme === 'light';
+  const cardStyle = {
+    background: isLight ? 'rgba(255,255,255,0.45)' : colors.card,
+    border: isLight ? '1px solid rgba(255,255,255,0.7)' : `1px solid ${colors.border}`,
+    backdropFilter: isLight ? 'blur(16px)' : 'none',
+    WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none',
+    boxShadow: isLight ? '0 6px 20px rgba(100,140,220,0.08), inset 0 1px 0 rgba(255,255,255,0.9)' : 'none',
+  };
+  return (
   <>
     <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
     <div style={{ display:'grid', gridTemplateColumns:isDesktop?'repeat(3,1fr)':'repeat(2,1fr)', gap:'14px', marginBottom:'20px' }}>
       {[1,2,isDesktop?3:null].filter(Boolean).map(i => (
-        <div key={i} style={{ background:colors.card, border:`1px solid ${colors.border}`, borderRadius:RADIUS.lg, padding:'20px' }}>
+        <div key={i} style={{ ...cardStyle, borderRadius:RADIUS.lg, padding:'20px' }}>
           <Shimmer h="12px" w="55%" /><div style={{marginTop:'10px'}}/>
           <Shimmer h="30px" w="40%" r="6px" /><div style={{marginTop:'8px'}}/>
           <Shimmer h="10px" w="25%" />
@@ -39,11 +48,11 @@ const SkeletonDashboard = ({ isDesktop, colors }) => (
       ))}
     </div>
     <div style={{ display:isDesktop?'grid':'flex', flexDirection:'column', gridTemplateColumns:'1.3fr 0.7fr', gap:'20px' }}>
-      <div style={{ background:colors.card, border:`1px solid ${colors.border}`, borderRadius:RADIUS.lg, padding:'20px', minHeight:'280px' }}>
+      <div style={{ ...cardStyle, borderRadius:RADIUS.lg, padding:'20px', minHeight:'280px' }}>
         <Shimmer h="12px" w="40%" />
         <div style={{ margin:'28px auto', width:'180px', height:'180px', borderRadius:'50%', border:'30px solid rgba(91,155,213,0.07)' }} />
       </div>
-      <div style={{ background:colors.card, border:`1px solid ${colors.border}`, borderRadius:RADIUS.lg, padding:'20px' }}>
+      <div style={{ ...cardStyle, borderRadius:RADIUS.lg, padding:'20px' }}>
         <Shimmer h="12px" w="50%" />
         {[1,2,3,4,5].map(i => (
           <div key={i} style={{ display:'flex', gap:'10px', alignItems:'center', marginTop:'14px' }}>
@@ -55,7 +64,8 @@ const SkeletonDashboard = ({ isDesktop, colors }) => (
       </div>
     </div>
   </>
-);
+  );
+};
 
 const RefreshIcon = ({ size=18, color='currentColor', spinning }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
@@ -218,9 +228,10 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
       <div style={{
         padding: isDesktop ? '20px 36px' : '14px 18px',
         display:'flex', justifyContent:'space-between', alignItems:'center',
-        borderBottom:`1px solid ${colors.border}`,
-        background:'rgba(5,14,28,0.6)',
-        backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+        borderBottom: theme === 'light' ? '1px solid rgba(255,255,255,0.6)' : `1px solid ${colors.border}`,
+        background: theme === 'light' ? 'rgba(238,243,252,0.8)' : 'rgba(4,8,16,0.85)',
+        backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
+        boxShadow: theme === 'light' ? 'inset 0 -1px 0 rgba(255,255,255,0.5)' : 'none',
         position: 'sticky', top: 0, zIndex: 100,
       }}>
         <div>
@@ -232,7 +243,10 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
           </p>
         </div>
         <button onClick={handleRefresh} disabled={initialLoading || fetching} style={{
-          background:colors.surface, border:`1px solid ${colors.border}`,
+          background: theme === 'light' ? 'rgba(255,255,255,0.6)' : colors.surface,
+          backdropFilter: theme === 'light' ? 'blur(10px)' : 'none',
+          border: theme === 'light' ? '1px solid rgba(255,255,255,0.8)' : `1px solid ${colors.border}`,
+          boxShadow: theme === 'light' ? '0 4px 12px rgba(100,140,220,0.1), inset 0 1px 0 rgba(255,255,255,0.9)' : 'none',
           borderRadius:RADIUS.sm, padding:'8px', cursor:'pointer',
           display:'flex', alignItems:'center',
         }}>
@@ -251,6 +265,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
           dateRange={dateRange}         setDateRange={setDateRange}
           fetchData={fetchData}
           colors={colors}
+          theme={theme}
         />
 
         {error && (
@@ -278,10 +293,10 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
               gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)',
               gap:'14px', marginBottom:'20px',
             }}>
-              <KpiCard label="Total Paket"    value={meta.totalScan}  accent={NAVY[700]} colors={colors} unit="pcs" />
-              <KpiCard label="Staff Aktif"    value={meta.staffCount} accent="#6B7280"   colors={colors} unit="org" />
+              <KpiCard label="Total Paket"    value={meta.totalScan}  accent={NAVY[700]} colors={colors} unit="pcs" theme={theme} />
+              <KpiCard label="Staff Aktif"    value={meta.staffCount} accent="#6B7280"   colors={colors} unit="org" theme={theme} />
               {isDesktop && rows.length > 0 && (
-                <KpiCard label="Top Performer" value={rows[0]?.nama}  accent="#D4AF37"   colors={colors} small />
+                <KpiCard label="Top Performer" value={rows[0]?.nama}  accent="#D4AF37"   colors={colors} small theme={theme} />
               )}
             </div>
 
@@ -291,8 +306,8 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
               gridTemplateColumns:'1.3fr 0.7fr',
               gap:'20px',
             }}>
-              <ChartCard rows={rows} colors={colors} barColor={barColor} loading={false} isDesktop={isDesktop} />
-              <RankCard  rows={rows} colors={colors} rankStyle={rankStyle} barColor={barColor} />
+              <ChartCard rows={rows} colors={colors} barColor={barColor} loading={false} isDesktop={isDesktop} theme={theme} />
+              <RankCard  rows={rows} colors={colors} rankStyle={rankStyle} barColor={barColor} theme={theme} />
             </div>
           </div>
         )}
