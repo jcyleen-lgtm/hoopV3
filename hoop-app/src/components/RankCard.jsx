@@ -24,7 +24,9 @@ const RankCard = ({ rows, colors, rankStyle, barColor, theme }) => {
         return (
           <div key={i} style={{ padding: '11px 20px', borderTop: `1px solid ${colors.borderSub || colors.border}`, display: 'flex', alignItems: 'center', gap: '12px' }}>
             {/* Rank badge */}
-            <div style={{ width: '28px', height: '28px', borderRadius: RADIUS.sm, background: rs.bg, color: rs.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: TYPE.sm, fontWeight: '700', flexShrink: 0 }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: RADIUS.sm, background: rs.bg, color: rs.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: TYPE.sm, fontWeight: '700', flexShrink: 0,
+              boxShadow: i === 0 ? '0 0 12px rgba(212,175,55,0.5)' : i === 1 ? '0 0 8px rgba(158,167,177,0.3)' : i === 2 ? '0 0 8px rgba(193,127,61,0.4)' : 'none',
+            }}>
               {i + 1}
             </div>
 
@@ -34,7 +36,7 @@ const RankCard = ({ rows, colors, rankStyle, barColor, theme }) => {
                 {item.nama}
               </div>
               <div style={{ height: '3px', background: colors.surface, borderRadius: RADIUS.pill, marginTop: '5px' }}>
-                <div style={{ height: '100%', width: `${pct}%`, background: barColor(i), borderRadius: RADIUS.pill }} />
+                <div style={{ height: '100%', width: `${pct}%`, background: barColor(i), borderRadius: RADIUS.pill, boxShadow: i < 3 ? `0 0 6px ${barColor(i)}80` : 'none' }} />
               </div>
             </div>
 

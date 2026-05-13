@@ -221,7 +221,12 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
   const showData     = !initialLoading && !error;
 
   return (
-    <div style={{ background:'transparent', fontFamily:FONT }}>
+    <div style={{ background:'transparent', fontFamily:FONT, position:'relative' }}>
+      {/* Ambient orbs */}
+      <div style={{ position:'fixed', top:0, left:72, right:0, bottom:0, pointerEvents:'none', zIndex:0, overflow:'hidden' }}>
+        <div style={{ position:'absolute', width:'400px', height:'400px', top:'-150px', right:'-80px', borderRadius:'50%', background:'radial-gradient(circle,rgba(168,85,247,0.08) 0%,transparent 65%)' }} />
+        <div style={{ position:'absolute', width:'300px', height:'300px', bottom:'100px', left:'-60px', borderRadius:'50%', background:'radial-gradient(circle,rgba(59,130,196,0.07) 0%,transparent 65%)' }} />
+      </div>
       <style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
@@ -254,7 +259,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
         </button>
       </div>
 
-      <div style={{ padding: isDesktop ? '24px 36px 40px' : '16px 16px 100px' }}>
+      <div style={{ padding: isDesktop ? '24px 36px 40px' : '16px 16px 100px', position:'relative', zIndex:1 }}>
         <FilterBar
           QUICK={QUICK}
           filterMode={filterMode}       activeQuick={activeQuick}
@@ -274,9 +279,10 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
             <p style={{ marginTop:'12px', fontSize:TYPE.base }}>Gagal memuat data dari Google Sheets.</p>
             <button onClick={handleRefresh} style={{
               marginTop:'16px', height:'38px', padding:'0 20px',
-              background:NAVY[700], color:'#fff', border:'none',
+              background:'linear-gradient(135deg,#1A3A5C,#3B82C4)', color:'#fff', border:'none',
               borderRadius:RADIUS.md, fontSize:TYPE.sm, fontWeight:'600',
               cursor:'pointer', fontFamily:FONT,
+              boxShadow:'0 0 16px rgba(59,130,196,0.3)',
             }}>
               Coba Lagi
             </button>
@@ -287,7 +293,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
         {showData && (
           /* opacity saat fetching supaya user tahu ada update tanpa skeleton */
-          <div style={{ opacity: fetching ? 0.6 : 1, transition: 'opacity 0.2s ease', pointerEvents: fetching ? 'none' : 'auto' }}>
+          <div style={{ opacity: fetching ? 0.6 : 1, transition: 'opacity 0.2s ease', pointerEvents: fetching ? 'none' : 'auto', position:'relative' }}>
             <div style={{
               display:'grid',
               gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)',
