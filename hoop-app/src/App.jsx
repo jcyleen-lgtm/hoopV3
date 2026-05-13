@@ -59,7 +59,7 @@ function App() {
     <div style={{
       backgroundColor: colors.bg,
       color: colors.text,
-      minHeight: '100vh',
+      height: '100%',
       transition: 'background-color 0.3s ease',
       margin: 0,
       padding: 0,

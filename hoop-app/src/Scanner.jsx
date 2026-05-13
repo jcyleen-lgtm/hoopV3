@@ -51,7 +51,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: colors.bgGrad || colors.bg, color: colors.text, fontFamily: FONT }}>
+    <div style={{ display: 'flex', height: '100%', background: colors.bgGrad || colors.bg, color: colors.text, fontFamily: FONT }}>
       <GlobalStyles colors={colors} />
 
       {/* Sidebar - Desktop Only */}
@@ -70,7 +70,9 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
       <main style={{
         flex: 1,
         marginLeft: isDesktop ? SIDEBAR_WIDTH : 0,
-        minHeight: '100vh',
+        height: '100vh',
+        overflowY: 'auto',
+        overflowX: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         transition: 'margin-left .25s ease',
@@ -160,11 +162,17 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
   </header>
 );
 
-// ── GlobalStyles ───────────────────────────────────────────────────────────────
 const GlobalStyles = ({ colors }) => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    #root {
+      height: 100%;
+    }
     body {
       background: ${colors.bgGrad || colors.bg};
       font-family: 'Inter', sans-serif;

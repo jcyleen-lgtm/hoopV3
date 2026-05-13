@@ -193,6 +193,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
         borderBottom:`1px solid ${colors.border}`,
         background:'rgba(5,14,28,0.6)',
         backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)',
+        position: 'sticky', top: 0, zIndex: 100,
       }}>
         <div>
           <h1 style={{ fontSize:TYPE.xl, fontWeight:'800', color:colors.text, margin:0, letterSpacing:'-0.3px' }}>
