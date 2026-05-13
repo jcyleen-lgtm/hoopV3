@@ -72,7 +72,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
         marginLeft: isDesktop ? SIDEBAR_WIDTH : 0,
         height: '100vh',
         overflowY: 'auto',
-        overflowX: 'hidden',
+        
         display: 'flex',
         flexDirection: 'column',
         transition: 'margin-left .25s ease',

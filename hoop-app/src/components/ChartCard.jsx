@@ -26,7 +26,7 @@ const PctLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
   );
 };
 
-const ChartCard = ({ rows, colors }) => {
+const ChartCard = ({ rows, colors, isDesktop }) => {
   const [activeIdx, setActiveIdx] = useState(null);
   const top    = rows.slice(0, 10);
   const total  = rows.reduce((s, r) => s + r.total, 0);
@@ -39,12 +39,12 @@ const ChartCard = ({ rows, colors }) => {
       </div>
 
       {total > 0 ? (
-        <div style={{ position: 'relative', width: '100%', height: 220 }}>
+        <div style={{ position: 'relative', width: '100%', height: isDesktop ? 380 : 220 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={top} dataKey="total" nameKey="nama"
-                cx="50%" cy="50%" innerRadius={60} outerRadius={90}
+                cx="50%" cy="50%" innerRadius={isDesktop ? 100 : 60} outerRadius={isDesktop ? 150 : 90}
                 labelLine={false} label={PctLabel}
                 activeIndex={activeIdx} activeShape={ActiveSlice}
                 onMouseEnter={(_, i) => setActiveIdx(i)}
@@ -69,13 +69,13 @@ const ChartCard = ({ rows, colors }) => {
           }}>
             {active ? (
               <>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#fff', lineHeight: 1.2, maxWidth: '80px' }}>{active.nama}</div>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: '#fff', lineHeight: 1 }}>{active.total.toLocaleString()}</div>
+                <div style={{ fontSize: isDesktop ? '16px' : '13px', fontWeight: '700', color: '#fff', lineHeight: 1.2, maxWidth: isDesktop ? '120px' : '80px' }}>{active.nama}</div>
+                <div style={{ fontSize: isDesktop ? '24px' : '18px', fontWeight: '800', color: '#fff', lineHeight: 1 }}>{active.total.toLocaleString()}</div>
                 <div style={{ fontSize: '10px', color: 'rgba(181,212,244,0.6)' }}>{((active.total / total) * 100).toFixed(1)}%</div>
               </>
             ) : (
               <>
-                <div style={{ fontSize: '20px', fontWeight: '800', color: colors.text, lineHeight: 1 }}>{total.toLocaleString()}</div>
+                <div style={{ fontSize: isDesktop ? '28px' : '20px', fontWeight: '800', color: colors.text, lineHeight: 1 }}>{total.toLocaleString()}</div>
                 <div style={{ fontSize: TYPE.xs, color: colors.subText, marginTop: '2px' }}>total pcs</div>
               </>
             )}

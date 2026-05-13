@@ -282,7 +282,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
               gridTemplateColumns:'1.3fr 0.7fr',
               gap:'20px',
             }}>
-              <ChartCard rows={rows} colors={colors} barColor={barColor} loading={false} />
+              <ChartCard rows={rows} colors={colors} barColor={barColor} loading={false} isDesktop={isDesktop} />
               <RankCard  rows={rows} colors={colors} rankStyle={rankStyle} barColor={barColor} />
             </div>
           </div>

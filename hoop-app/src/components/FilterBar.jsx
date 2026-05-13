@@ -59,15 +59,14 @@ const FilterBar = ({
     fetchData('month', null, monthName);
   };
 
-  // FIX: jangan ubah filterMode supaya input tanggal tidak hilang
-  // cukup pass 'custom' + range langsung ke fetchData
   const handleCustomApply = () => {
     if (!dateRange.start || !dateRange.end) return;
+    setFilterMode('custom');
     fetchData('custom', dateRange, null);
   };
 
   // Input muncul selama pill "Custom" aktif (filterMode quick + activeQuick custom)
-  const isCustomActive = filterMode === 'quick' && activeQuick === 'custom';
+  const isCustomActive = (filterMode === 'quick' && activeQuick === 'custom') || filterMode === 'custom';
 
   return (
     <div style={{
