@@ -8,6 +8,7 @@ import ScannerCamera   from './components/ScannerCamera';
 import ProductList     from './components/ProductList';
 import ProfilePage     from './components/ProfilePage';
 import AdminDashboard  from './AdminDashboard';
+import HomePage        from './components/HomePage';
 
 // Inline SVG icons (no lucide-react)
 const MoonIcon = () => (
@@ -28,7 +29,7 @@ const SunIcon = () => (
 // Props: user, onLogout, theme, toggleTheme — all from App.jsx
 // Scanner no longer manages its own auth state.
 const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
-  const [page, setPage]         = useState('scan');
+  const [page, setPage]         = useState('home');
   const [isDesktop, setDesktop] = useState(window.innerWidth >= 768);
 
   const colors = makeColors(theme);
@@ -45,7 +46,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   };
 
   const contentPad = () => {
-    if (page === 'dashboard') return '0';
+    if (page === 'dashboard' || page === 'home') return '0';
     if (isDesktop) return '28px 36px';
     return '16px 16px 80px';
   };
@@ -78,7 +79,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
         transition: 'margin-left .25s ease',
       }}>
         {/* TopBar (hidden on dashboard — it has its own header) */}
-        {page !== 'dashboard' && (
+        {page !== 'dashboard' && page !== 'home' && (
           <TopBar
             isDesktop={isDesktop}
             user={user}
@@ -92,6 +93,9 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
 
         {/* Dynamic Page Content */}
         <div style={{ flex: 1, padding: contentPad() }}>
+          {page === 'home' && (
+            <HomePage user={user} isDesktop={isDesktop} onNavigate={navigate} />
+          )}
           {page === 'scan' && (
             <ScannerCamera user={user} active={page === 'scan'} colors={colors} isDesktop={isDesktop} />
           )}
