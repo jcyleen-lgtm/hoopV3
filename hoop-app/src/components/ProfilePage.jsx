@@ -74,10 +74,10 @@ const ProfilePage = ({ user, theme, colors, onToggleTheme, onLogout }) => {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               {theme === 'light'
-                ? <MoonIcon color={colors.subText} />
-                : <SunIcon  color={colors.subText} />}
+                ? <SunIcon  color={colors.subText} />
+                : <MoonIcon color={colors.subText} />}
               <span style={{ fontSize: TYPE.base, color: colors.text }}>
-                {theme === 'light' ? 'Dark mode' : 'Light mode'}
+                {theme === 'light' ? 'Light mode' : 'Dark mode'}
               </span>
             </div>
             <button
