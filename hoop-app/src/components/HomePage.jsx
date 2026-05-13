@@ -77,14 +77,12 @@ const StaffDots = ({ count, total = 15 }) => (
 );
 
 // ── Feed time format ───────────────────────────────────────────
-const timeAgo = (timeStr) => {
-  if (!timeStr) return '';
-  const [h, m] = timeStr.split(':').map(Number);
-  const now = new Date();
-  const diffMin = (now.getHours() * 60 + now.getMinutes()) - (h * 60 + m);
-  if (diffMin <= 0) return 'baru saja';
-  if (diffMin < 60) return `${diffMin}m lalu`;
-  return `${Math.floor(diffMin / 60)}j lalu`;
+const timeAgo = (isoStr) => {
+  if (!isoStr) return '';
+  const diff = Math.floor((Date.now() - new Date(isoStr).getTime()) / 60000);
+  if (diff <= 1) return 'baru saja';
+  if (diff < 60) return `${diff}m lalu`;
+  return `${Math.floor(diff / 60)}j lalu`;
 };
 
 const FEED_COLORS = ['#22C55E','#3B82C4','#F59E0B','#A855F7','#EF4444','#14B8A6'];
