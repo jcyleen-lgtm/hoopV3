@@ -1,5 +1,6 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { TYPE, RADIUS, FONT } from '../theme';
+import { callScript } from '../api';
 
 const FilterIcon   = ({ color }) => <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
 const CalendarIcon = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
@@ -8,6 +9,9 @@ const ChevronIcon  = ({ open }) => <svg width="11" height="11" viewBox="0 0 24 2
 const MONTH_SHORT   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const FULL_MONTHS   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MONTH_PATTERN = /^(January|February|March|April|May|June|July|August|September|October|November|December)$/;
+
+// Cache prefetch supaya tidak double-fetch
+const PREFETCH_CACHE = {};
 
 const pill = (active) => ({
   padding:'6px 14px', borderRadius:RADIUS.pill,
@@ -28,7 +32,8 @@ const FilterBar = ({
   dateRange, setDateRange,
   fetchData,
 }) => {
-  const menuRef = useRef(null);
+  const menuRef    = useRef(null);
+  const prefetchRef = useRef(null);
 
   // Tutup menu saat klik luar
   useEffect(() => {
@@ -52,6 +57,27 @@ const FilterBar = ({
     return idx >= 0 ? MONTH_SHORT[idx] : selectedMonth;
   }, [selectedMonth]);
 
+  // Prefetch ke Worker/Apps Script di background — simpan hasilnya di PREFETCH_CACHE
+  // supaya saat user klik Tampilkan, fetchData tinggal ambil dari cache
+  const prefetch = useCallback((start, end) => {
+    if (!start || !end) return;
+    const key = `custom_${start}_${end}`;
+    if (PREFETCH_CACHE[key]) return; // sudah pernah prefetch
+    PREFETCH_CACHE[key] = true;
+
+    // Panggil callScript langsung — hasilnya akan di-cache di Cloudflare Worker
+    // Saat fetchData dipanggil nanti, Worker langsung return dari cache
+    callScript({ action: 'getRekapan', type: 'custom', start, end })
+      .then(res => {
+        if (res?.status === 'success') {
+          // Simpan juga di GLOBAL_CACHE AdminDashboard via event
+          window.__hoopPrefetchResult = window.__hoopPrefetchResult || {};
+          window.__hoopPrefetchResult[key] = res;
+        }
+      })
+      .catch(() => { delete PREFETCH_CACHE[key]; });
+  }, []);
+
   const handleMonthSelect = (monthName) => {
     setSelMonth(monthName);
     setFilterMode('month');
@@ -61,13 +87,34 @@ const FilterBar = ({
 
   const handleCustomApply = () => {
     if (!dateRange.start || !dateRange.end) return;
-    // setFilterMode dipanggil SETELAH fetchData supaya tidak race condition
-    // fetchData sudah dapat overrideMode='custom' langsung
     fetchData('custom', { start: dateRange.start, end: dateRange.end }, null);
     setFilterMode('custom');
   };
 
-  // Input muncul selama pill "Custom" aktif (filterMode quick + activeQuick custom)
+  // Prefetch saat start date diisi dan end date sudah ada, atau sebaliknya
+  const handleStartChange = (val) => {
+    setDateRange(r => {
+      const next = { ...r, start: val };
+      if (next.end) {
+        // Debounce 300ms supaya tidak prefetch tiap keystroke
+        clearTimeout(prefetchRef.current);
+        prefetchRef.current = setTimeout(() => prefetch(val, next.end), 300);
+      }
+      return next;
+    });
+  };
+
+  const handleEndChange = (val) => {
+    setDateRange(r => {
+      const next = { ...r, end: val };
+      if (next.start) {
+        clearTimeout(prefetchRef.current);
+        prefetchRef.current = setTimeout(() => prefetch(next.start, val), 300);
+      }
+      return next;
+    });
+  };
+
   const isCustomActive = (filterMode === 'quick' && activeQuick === 'custom') || filterMode === 'custom';
 
   return (
@@ -153,18 +200,17 @@ const FilterBar = ({
         </div>
       </div>
 
-      {/* Custom date range — muncul selama pill Custom aktif */}
       {isCustomActive && (
         <div style={{ display:'flex', alignItems:'center', gap:'8px', marginTop:'10px', flexWrap:'wrap' }}>
           <span style={{ fontSize:TYPE.xs, color:'rgba(181,212,244,0.45)', whiteSpace:'nowrap' }}>Dari</span>
           <input type="date" value={dateRange.start}
-            onChange={e => setDateRange(r => ({ ...r, start: e.target.value }))}
+            onChange={e => handleStartChange(e.target.value)}
             style={dateInputStyle}
           />
           <span style={{ fontSize:TYPE.xs, color:'rgba(181,212,244,0.45)', whiteSpace:'nowrap' }}>s/d</span>
           <input type="date" value={dateRange.end}
             min={dateRange.start}
-            onChange={e => setDateRange(r => ({ ...r, end: e.target.value }))}
+            onChange={e => handleEndChange(e.target.value)}
             style={dateInputStyle}
           />
           <button

@@ -135,6 +135,13 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
     const cacheKey = getCacheKey(mode, quick, month, range);
 
+    // Cek prefetch result dari FilterBar (prefetch saat user isi tanggal)
+    const prefetched = window.__hoopPrefetchResult?.[cacheKey];
+    if (prefetched && !GLOBAL_CACHE[cacheKey]) {
+      GLOBAL_CACHE[cacheKey] = prefetched;
+      delete window.__hoopPrefetchResult[cacheKey];
+    }
+
     // Hit cache → tampil instant, tidak ada loading sama sekali
     if (GLOBAL_CACHE[cacheKey]) {
       const c = GLOBAL_CACHE[cacheKey];
