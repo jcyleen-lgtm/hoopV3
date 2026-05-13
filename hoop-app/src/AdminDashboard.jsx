@@ -259,7 +259,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
         </button>
       </div>
 
-      <div style={{ padding: isDesktop ? '24px 36px 40px' : '16px 16px 100px', position:'relative', zIndex:1 }}>
+      <div style={{ padding: isDesktop ? '24px 36px 40px' : '16px 16px 100px' }}>
         <FilterBar
           QUICK={QUICK}
           filterMode={filterMode}       activeQuick={activeQuick}
@@ -293,7 +293,7 @@ const AdminDashboard = ({ user, isDesktop, theme }) => {
 
         {showData && (
           /* opacity saat fetching supaya user tahu ada update tanpa skeleton */
-          <div style={{ opacity: fetching ? 0.6 : 1, transition: 'opacity 0.2s ease', pointerEvents: fetching ? 'none' : 'auto', position:'relative' }}>
+          <div style={{ opacity: fetching ? 0.6 : 1, transition: 'opacity 0.2s ease', pointerEvents: fetching ? 'none' : 'auto' }}>
             <div style={{
               display:'grid',
               gridTemplateColumns: isDesktop ? 'repeat(3,1fr)' : 'repeat(2,1fr)',

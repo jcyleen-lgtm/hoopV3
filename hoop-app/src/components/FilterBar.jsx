@@ -158,7 +158,7 @@ const FilterBar = ({
               backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
               border: isLight ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(91,155,213,0.2)',
               borderRadius:RADIUS.md, padding:'12px',
-              zIndex:300, minWidth:'236px',
+              zIndex:9999, minWidth:'236px',
               boxShadow: isLight ? '0 16px 48px rgba(100,140,220,0.2), inset 0 1px 0 rgba(255,255,255,0.9)' : '0 16px 48px rgba(0,0,0,0.7)',
             }}>
               <div style={{

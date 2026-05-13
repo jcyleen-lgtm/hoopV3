@@ -180,7 +180,7 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
           boxShadow: theme === 'light' ? 'inset 0 1px 0 rgba(255,255,255,0.9)' : '0 0 10px rgba(59,130,196,0.1)',
         }}
       >
-        {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+        {theme === 'dark' ? <MoonIcon /> : <SunIcon />}
       </button>
     </div>
   </header>
