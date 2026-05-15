@@ -179,17 +179,17 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
     const hour = new Date().getHours();
     const timeLabel = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 20 ? 'Good evening' : 'Good night';
     const motivasi = hour < 5
-      ? 'Still grinding? You're a legend — rest when you can.'
+      ? "Still grinding? You're a legend — rest when you can."
       : hour < 9
-      ? 'New day, new target. Let's go!'
+      ? "New day, new target. Let's go!"
       : hour < 12
       ? 'Morning energy. Stay sharp and keep pushing.'
       : hour < 14
       ? 'Midday focus. Finish strong.'
       : hour < 17
-      ? 'Afternoon grind. You've got this.'
+      ? "Afternoon grind. You've got this."
       : hour < 20
-      ? 'Closing shift — give it everything you've got.'
+      ? "Closing shift — give it everything you've got."
       : 'Overtime mode ON. The best teams never quit.';
 
     return (
