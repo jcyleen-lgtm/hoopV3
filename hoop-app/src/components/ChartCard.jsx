@@ -33,10 +33,12 @@ const PctLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
 const ChartCard = ({ rows, colors, isDesktop, theme }) => {
   const isLight = theme === 'light';
   const card = glassCard(theme, '59,130,196');
-  const [activeIdx, setActiveIdx] = useState(null);
+  const [hoverIdx, setHoverIdx]   = useState(null);
+  const [pinnedIdx, setPinnedIdx] = useState(null);
+  const activeIdx = hoverIdx !== null ? hoverIdx : pinnedIdx;
   const top    = rows.slice(0, 10);
   const total  = rows.reduce((s, r) => s + r.total, 0);
-  const active = activeIdx !== null ? top[activeIdx] : null;
+  const active = activeIdx !== null ? top[activeIdx] : null;  // activeIdx = hoverIdx ?? pinnedIdx
   const activeColor = activeIdx !== null ? COLORS[activeIdx % COLORS.length] : null;
   const activeGlow  = activeIdx !== null ? GLOW_COLORS[activeIdx % GLOW_COLORS.length] : null;
 
@@ -71,9 +73,9 @@ const ChartCard = ({ rows, colors, isDesktop, theme }) => {
                 outerRadius={isDesktop ? 150 : 90}
                 labelLine={false} label={PctLabel}
                 activeIndex={activeIdx} activeShape={ActiveSlice}
-                onMouseEnter={(_, i) => setActiveIdx(i)}
-                onMouseLeave={() => setActiveIdx(null)}
-                onClick={(_, i) => setActiveIdx(activeIdx === i ? null : i)}
+                onMouseEnter={(_, i) => setHoverIdx(i)}
+                onMouseLeave={() => setHoverIdx(null)}
+                onClick={(_, i) => setPinnedIdx(pinnedIdx === i ? null : i)}
                 strokeWidth={1.5} stroke="rgba(0,0,0,0.3)"
               >
                 {top.map((_, i) => (

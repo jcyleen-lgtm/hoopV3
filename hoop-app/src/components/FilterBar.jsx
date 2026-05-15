@@ -37,7 +37,7 @@ const FilterBar = ({
   const menuRef    = useRef(null);
   const btnRef     = useRef(null);
   const prefetchRef = useRef(null);
-  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
+  const [dropPos, setDropPos] = useState(null);
 
   // Tutup menu saat klik luar
   useEffect(() => {
@@ -147,7 +147,7 @@ const FilterBar = ({
           <button
             ref={btnRef}
             onClick={() => {
-              if (btnRef.current) {
+              if (!showMonthMenu && btnRef.current) {
                 const rect = btnRef.current.getBoundingClientRect();
                 setDropPos({ top: rect.bottom + 6, left: rect.left });
               }
@@ -160,7 +160,7 @@ const FilterBar = ({
             <ChevronIcon open={showMonthMenu} />
           </button>
 
-          {showMonthMenu && (
+          {showMonthMenu && dropPos && (
             <div style={{
               position:'fixed', top: dropPos.top, left: dropPos.left,
               background: isLight ? 'rgba(238,243,252,0.96)' : 'rgba(5,14,28,0.98)',
