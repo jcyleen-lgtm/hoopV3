@@ -303,6 +303,5 @@ const LoginPage = ({ onLogin, isLoading }) => {
     </div>
   );
 };
-};
 
 export default LoginPage;
