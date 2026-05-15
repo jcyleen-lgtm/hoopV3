@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import { TYPE, RADIUS, FONT, glassCard } from '../theme';
 import { callScript } from '../api';
 
@@ -35,7 +35,9 @@ const FilterBar = ({
 }) => {
   const isLight = theme === 'light';
   const menuRef    = useRef(null);
+  const btnRef     = useRef(null);
   const prefetchRef = useRef(null);
+  const [dropPos, setDropPos] = useState({ top: 0, left: 0 });
 
   // Tutup menu saat klik luar
   useEffect(() => {
@@ -141,9 +143,16 @@ const FilterBar = ({
         })}
 
         {/* Month Picker */}
-        <div style={{ position:'relative' }} ref={menuRef}>
+        <div ref={menuRef}>
           <button
-            onClick={() => setShowMonthMenu(o => !o)}
+            ref={btnRef}
+            onClick={() => {
+              if (btnRef.current) {
+                const rect = btnRef.current.getBoundingClientRect();
+                setDropPos({ top: rect.bottom + 6, left: rect.left });
+              }
+              setShowMonthMenu(o => !o);
+            }}
             style={{ ...pill(filterMode === 'month'), display:'flex', alignItems:'center', gap:'5px' }}
           >
             <CalendarIcon />
@@ -153,13 +162,13 @@ const FilterBar = ({
 
           {showMonthMenu && (
             <div style={{
-              position:'absolute', top:'calc(100% + 6px)', left:0,
-              background: isLight ? 'rgba(238,243,252,0.92)' : 'rgba(5,14,28,0.97)',
+              position:'fixed', top: dropPos.top, left: dropPos.left,
+              background: isLight ? 'rgba(238,243,252,0.96)' : 'rgba(5,14,28,0.98)',
               backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
               border: isLight ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(91,155,213,0.2)',
               borderRadius:RADIUS.md, padding:'12px',
-              zIndex:9999, minWidth:'236px',
-              boxShadow: isLight ? '0 16px 48px rgba(100,140,220,0.2), inset 0 1px 0 rgba(255,255,255,0.9)' : '0 16px 48px rgba(0,0,0,0.7)',
+              zIndex:99999, minWidth:'236px',
+              boxShadow: isLight ? '0 16px 48px rgba(100,140,220,0.25), inset 0 1px 0 rgba(255,255,255,0.9)' : '0 16px 48px rgba(0,0,0,0.8)',
             }}>
               <div style={{
                 fontSize:'10px', fontWeight:'700',
