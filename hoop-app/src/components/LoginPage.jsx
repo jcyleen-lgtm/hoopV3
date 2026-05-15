@@ -78,7 +78,7 @@ const LoginPage = ({ onLogin, isLoading }) => {
   };
 
   return (
-    <div style={{ position:'fixed', inset:0, background:'#020B18', overflow:'hidden', fontFamily:"'Inter',system-ui,sans-serif" }}>
+    <div style={{ position:'fixed', inset:0, background:'#020B18', overflow:'hidden', fontFamily:"'Inter',system-ui,-apple-system,sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
@@ -86,7 +86,7 @@ const LoginPage = ({ onLogin, isLoading }) => {
         @keyframes fadeIn   {from{opacity:0}to{opacity:1}}
         @keyframes blink    {0%,100%{opacity:1}50%{opacity:0}}
         @keyframes spin     {from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        @keyframes gridMove {from{background-position:0 0}to{background-position:40px 40px}}
+        @keyframes cardGlow{0%,100%{box-shadow:0 0 40px rgba(56,189,248,0.07),0 40px 80px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.08)}50%{box-shadow:0 0 70px rgba(56,189,248,0.15),0 40px 80px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.12)}}
         @keyframes scanLine {0%{top:-1px;opacity:0.7}100%{top:100%;opacity:0}}
         @keyframes topGlow  {0%,100%{opacity:0.55}50%{opacity:1}}
         @keyframes logoPulse{0%,100%{box-shadow:0 0 22px rgba(56,189,248,0.28),0 0 44px rgba(56,189,248,0.1)}50%{box-shadow:0 0 40px rgba(56,189,248,0.5),0 0 80px rgba(56,189,248,0.2)}}
@@ -106,11 +106,10 @@ const LoginPage = ({ onLogin, isLoading }) => {
 
       <canvas ref={canvasRef} style={{ position:'absolute', inset:0, zIndex:0 }} />
 
-      {/* Moving grid */}
-      <div style={{ position:'absolute', inset:0, zIndex:0, backgroundImage:'linear-gradient(rgba(56,189,248,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.025) 1px,transparent 1px)', backgroundSize:'40px 40px', animation:'gridMove 10s linear infinite' }} />
-
-      {/* Dot pattern */}
-      <div style={{ position:'absolute', inset:0, zIndex:0, backgroundImage:'radial-gradient(circle,rgba(56,189,248,0.08) 1px,transparent 1px)', backgroundSize:'34px 34px', maskImage:'radial-gradient(ellipse at 50% 40%,black 20%,transparent 70%)', WebkitMaskImage:'radial-gradient(ellipse at 50% 40%,black 20%,transparent 70%)' }} />
+      {/* Glowy star dots */}
+      <div style={{ position:'absolute', inset:0, zIndex:0, backgroundImage:'radial-gradient(circle,rgba(56,189,248,0.55) 1px,transparent 1px)', backgroundSize:'48px 48px' }} />
+      <div style={{ position:'absolute', inset:0, zIndex:0, backgroundImage:'radial-gradient(circle,rgba(56,189,248,0.25) 1.5px,transparent 1.5px)', backgroundSize:'80px 80px', backgroundPosition:'24px 24px' }} />
+      <div style={{ position:'absolute', inset:0, zIndex:0, backgroundImage:'radial-gradient(circle,rgba(56,189,248,0.15) 1px,transparent 1px)', backgroundSize:'120px 120px', backgroundPosition:'60px 60px' }} />
 
       {/* Global scan line */}
       <div style={{ position:'absolute', left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(56,189,248,0.18),rgba(56,189,248,0.42),rgba(56,189,248,0.18),transparent)', animation:'scanLine 7s linear infinite', zIndex:1, pointerEvents:'none' }} />
@@ -126,7 +125,7 @@ const LoginPage = ({ onLogin, isLoading }) => {
             <HoopLogo />
           </div>
           <h1 style={{ fontSize:'32px', fontWeight:'800', color:'#fff', letterSpacing:'-0.5px', margin:'0 0 6px', textShadow:'0 0 30px rgba(56,189,248,0.3)' }}>
-            {showWelcome ? 'Welcome to Hoop' : 'HOOP'}
+            {showWelcome ? 'Welcome to Hoop' : 'Hoop'}
           </h1>
           <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.4)', margin:0 }}>Warehouse Packing System</p>
           {showWelcome && (
@@ -154,7 +153,8 @@ const LoginPage = ({ onLogin, isLoading }) => {
               border:'1px solid rgba(255,255,255,0.1)',
               borderRadius:'24px',
               padding:'36px 28px 30px',
-              boxShadow:'0 0 60px rgba(56,189,248,0.07), 0 40px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1)',
+              boxShadow:'0 0 40px rgba(56,189,248,0.07), 0 40px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)',
+              animation:'cardGlow 4s ease-in-out infinite',
               position:'relative', overflow:'hidden',
             }}>
               {/* Inner scan */}
@@ -167,7 +167,7 @@ const LoginPage = ({ onLogin, isLoading }) => {
                 <div style={{ width:'56px', height:'56px', borderRadius:'18px', background:'rgba(8,20,50,0.6)', backdropFilter:'blur(12px)', border:'1px solid rgba(255,255,255,0.12)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px', animation:'logoPulse 3s ease-in-out infinite' }}>
                   <HoopLogo />
                 </div>
-                <h1 style={{ fontSize:'24px', fontWeight:'700', color:'#fff', letterSpacing:'-0.3px', margin:'0 0 5px', textShadow:'0 0 24px rgba(56,189,248,0.2)' }}>Welcome back</h1>
+                <h1 style={{ fontSize:'24px', fontWeight:'700', color:'#fff', letterSpacing:'-0.3px', margin:'0 0 5px', textShadow:'0 0 24px rgba(56,189,248,0.2)' }}>Welcome</h1>
                 <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.4)', margin:'0 0 16px', fontWeight:'400' }}>Sign in to your warehouse account</p>
 
                 {/* Status pill */}
