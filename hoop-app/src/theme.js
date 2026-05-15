@@ -69,4 +69,4 @@ export const glassCard = (theme, accentRgb = null) => {
 
 export const TYPE  = { xs:'11px', sm:'13px', base:'14px', md:'15px', lg:'18px', xl:'22px' };
 export const RADIUS = { sm:'10px', md:'14px', lg:'20px', xl:'28px', pill:'999px' };
-export const FONT  = "'Inter', system-ui, -apple-system, sans-serif";
+export const FONT  = "'Rajdhani', 'Inter', system-ui, sans-serif";

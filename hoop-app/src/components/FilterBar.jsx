@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useRef, useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { TYPE, RADIUS, FONT, glassCard } from '../theme';
 import { callScript } from '../api';
 
@@ -43,7 +44,10 @@ const FilterBar = ({
   useEffect(() => {
     if (!showMonthMenu) return;
     const handler = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      // Check if click is outside the button AND outside the portal dropdown
+      const clickedInsideBtn = menuRef.current && menuRef.current.contains(e.target);
+      const clickedInsideDrop = e.target.closest('[data-month-drop]');
+      if (!clickedInsideBtn && !clickedInsideDrop) {
         setShowMonthMenu(false);
       }
     };
@@ -160,24 +164,29 @@ const FilterBar = ({
             <ChevronIcon open={showMonthMenu} />
           </button>
 
-          {showMonthMenu && dropPos && (
-            <div style={{
-              position:'fixed', top: dropPos.top, left: dropPos.left,
-              background: isLight ? 'rgba(238,243,252,0.96)' : 'rgba(5,14,28,0.98)',
-              backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
-              border: isLight ? '1px solid rgba(255,255,255,0.8)' : '1px solid rgba(91,155,213,0.2)',
-              borderRadius:RADIUS.md, padding:'12px',
-              zIndex:99999, minWidth:'236px',
-              boxShadow: isLight ? '0 16px 48px rgba(100,140,220,0.25), inset 0 1px 0 rgba(255,255,255,0.9)' : '0 16px 48px rgba(0,0,0,0.8)',
-            }}>
+          {showMonthMenu && dropPos && createPortal(
+            <div
+              data-month-drop="true"
+              style={{
+                position:'fixed', top: dropPos.top, left: dropPos.left,
+                background: isLight ? 'rgba(238,243,252,0.97)' : 'rgba(4,12,28,0.98)',
+                backdropFilter:'blur(24px)', WebkitBackdropFilter:'blur(24px)',
+                border: isLight ? '1px solid rgba(255,255,255,0.85)' : '1px solid rgba(59,130,196,0.25)',
+                borderRadius:RADIUS.md, padding:'14px',
+                zIndex:99999, minWidth:'244px',
+                boxShadow: isLight
+                  ? '0 20px 60px rgba(100,140,220,0.2), inset 0 1px 0 rgba(255,255,255,0.9)'
+                  : '0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(59,130,196,0.1)',
+              }}
+            >
               <div style={{
                 fontSize:'10px', fontWeight:'700',
-                color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(181,212,244,0.35)',
-                letterSpacing:'.08em', marginBottom:'8px',
+                color: isLight ? 'rgba(30,60,120,0.4)' : 'rgba(96,165,250,0.5)',
+                letterSpacing:'.1em', marginBottom:'10px',
               }}>
                 PILIH BULAN
               </div>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'4px' }}>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'5px' }}>
                 {FULL_MONTHS.map((fullName, i) => {
                   const exists = validMonths.includes(fullName);
                   const sel    = selectedMonth === fullName;
@@ -186,16 +195,26 @@ const FilterBar = ({
                       disabled={!exists}
                       onClick={() => exists && handleMonthSelect(fullName)}
                       style={{
-                        padding:'8px 4px', borderRadius:'8px',
-                        border: sel ? 'none' : '1px solid rgba(91,155,213,0.1)',
+                        padding:'9px 4px', borderRadius:'8px',
+                        border: sel
+                          ? '1px solid rgba(59,130,196,0.4)'
+                          : exists
+                          ? `1px solid ${isLight ? 'rgba(59,130,196,0.1)' : 'rgba(59,130,196,0.08)'}`
+                          : '1px solid transparent',
                         background: sel
                           ? 'linear-gradient(135deg,#1A3A5C,#3B82C4)'
-                          : exists ? 'rgba(13,33,55,0.7)' : 'transparent',
-                        color: sel ? '#fff' : exists ? 'rgba(181,212,244,0.8)' : 'rgba(181,212,244,0.18)',
-                        fontSize:TYPE.xs, fontWeight: sel ? '700' : '400',
+                          : exists
+                          ? isLight ? 'rgba(255,255,255,0.6)' : 'rgba(8,20,40,0.8)'
+                          : 'transparent',
+                        color: sel
+                          ? '#fff'
+                          : exists
+                          ? isLight ? '#0D1F40' : 'rgba(181,212,244,0.85)'
+                          : isLight ? 'rgba(30,60,120,0.2)' : 'rgba(181,212,244,0.15)',
+                        fontSize:TYPE.xs, fontWeight: sel ? '700' : '500',
                         cursor: exists ? 'pointer' : 'default',
                         fontFamily:FONT, textAlign:'center',
-                        boxShadow: sel ? '0 2px 8px rgba(59,130,196,0.4)' : 'none',
+                        boxShadow: sel ? '0 2px 12px rgba(59,130,196,0.4)' : 'none',
                         transition:'all .15s',
                       }}
                     >
@@ -204,7 +223,8 @@ const FilterBar = ({
                   );
                 })}
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       </div>

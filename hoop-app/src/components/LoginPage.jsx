@@ -119,7 +119,7 @@ const LoginPage = ({ onLogin, isLoading }) => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 
-        @keyframes gridMove { from{background-position:0 0} to{background-position:40px 40px} }
+
         @keyframes scanLine { 0%{top:-2px;opacity:0.7} 100%{top:100%;opacity:0} }
         @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.02)} }
         @keyframes glowPulse { 0%,100%{box-shadow:0 0 30px rgba(56,189,248,0.25),0 0 60px rgba(56,189,248,0.1)} 50%{box-shadow:0 0 50px rgba(56,189,248,0.4),0 0 100px rgba(56,189,248,0.2)} }
@@ -161,31 +161,30 @@ const LoginPage = ({ onLogin, isLoading }) => {
         .hoop-btn::after { content:''; position:absolute; top:0; left:-100%; width:50%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent); transition:left 0.5s; }
         .hoop-btn:hover:not(:disabled)::after { left:150%; }
 
-        .corner-tl::before,.corner-tl::after,.corner-br::before,.corner-br::after {
-          content:''; position:absolute; width:16px; height:16px;
-        }
-        .corner-tl::before { top:0; left:0; border-top:2px solid rgba(56,189,248,0.6); border-left:2px solid rgba(56,189,248,0.6); }
-        .corner-tl::after  { bottom:0; right:0; border-bottom:2px solid rgba(56,189,248,0.6); border-right:2px solid rgba(56,189,248,0.6); }
+
       `}</style>
 
       {/* Particle canvas */}
       <canvas ref={canvasRef} style={{ position:'absolute', inset:0, zIndex:0, opacity:0.7 }} />
 
-      {/* Animated grid */}
+      {/* Dot pattern background */}
       <div style={{
         position:'absolute', inset:0, zIndex:0,
-        backgroundImage:'linear-gradient(rgba(56,189,248,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.04) 1px,transparent 1px)',
-        backgroundSize:'40px 40px',
-        animation:'gridMove 8s linear infinite',
+        backgroundImage:'radial-gradient(circle, rgba(56,189,248,0.12) 1px, transparent 1px)',
+        backgroundSize:'36px 36px',
+        maskImage:'radial-gradient(ellipse at center, black 30%, transparent 80%)',
+        WebkitMaskImage:'radial-gradient(ellipse at center, black 30%, transparent 80%)',
       }} />
 
       {/* Scan line */}
       <div style={{ position:'absolute', left:0, right:0, height:'2px', background:'linear-gradient(90deg,transparent,rgba(56,189,248,0.15),rgba(56,189,248,0.4),rgba(56,189,248,0.15),transparent)', zIndex:1, animation:'scanLine 5s linear infinite', pointerEvents:'none' }} />
 
       {/* Ambient glows */}
-      <div style={{ position:'absolute', top:'-20%', left:'50%', transform:'translateX(-50%)', width:'600px', height:'400px', borderRadius:'50%', background:'radial-gradient(circle,rgba(14,60,150,0.35) 0%,transparent 70%)', zIndex:0, pointerEvents:'none' }} />
-      <div style={{ position:'absolute', bottom:'-15%', left:'20%', width:'400px', height:'300px', borderRadius:'50%', background:'radial-gradient(circle,rgba(56,189,248,0.06) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
-      <div style={{ position:'absolute', bottom:'-15%', right:'15%', width:'350px', height:'280px', borderRadius:'50%', background:'radial-gradient(circle,rgba(14,60,150,0.12) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', top:'-15%', left:'50%', transform:'translateX(-50%)', width:'700px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle,rgba(14,60,150,0.4) 0%,rgba(56,189,248,0.08) 40%,transparent 70%)', zIndex:0, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', top:'30%', left:'-10%', width:'400px', height:'400px', borderRadius:'50%', background:'radial-gradient(circle,rgba(56,189,248,0.07) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'-20%', right:'-10%', width:'500px', height:'400px', borderRadius:'50%', background:'radial-gradient(circle,rgba(14,60,150,0.2) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'20%', left:'5%', width:'200px', height:'200px', borderRadius:'50%', background:'radial-gradient(circle,rgba(56,189,248,0.05) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', top:'15%', right:'8%', width:'180px', height:'180px', borderRadius:'50%', background:'radial-gradient(circle,rgba(56,189,248,0.06) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
 
       {/* ── BOOT PHASE ── */}
       {phase === 'boot' && (
@@ -238,24 +237,30 @@ const LoginPage = ({ onLogin, isLoading }) => {
           </div>
 
           {/* Glass card */}
-          <div style={{ position:'relative', width:'100%', maxWidth:'420px', padding:'0 20px' }}>
+          <div style={{ position:'relative', width:'100%', maxWidth:'400px', padding:'0 20px' }}>
             {/* Outer glow */}
             <div style={{ position:'absolute', inset:'-1px', borderRadius:'18px', boxShadow:'0 0 50px rgba(56,189,248,0.15),0 0 100px rgba(56,189,248,0.06)', pointerEvents:'none', animation:'glowPulse 4s ease-in-out infinite' }} />
 
             {/* Bottom edge glow */}
             <div style={{ position:'absolute', bottom:'19px', left:'30%', right:'30%', height:'1px', background:'linear-gradient(90deg,transparent,rgba(56,189,248,0.6),transparent)', boxShadow:'0 0 12px rgba(56,189,248,0.4)', pointerEvents:'none' }} />
 
-            <div className="corner-tl" style={{
+            <div style={{
               position:'relative',
-              background:'rgba(4,12,30,0.75)',
+              background:'rgba(4,12,30,0.8)',
               backdropFilter:'blur(32px)',
               WebkitBackdropFilter:'blur(32px)',
-              border:'1px solid rgba(56,189,248,0.15)',
+              border:'1px solid rgba(56,189,248,0.2)',
               borderRadius:'16px',
               padding:'28px 24px',
-              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(56,189,248,0.04)',
+              boxShadow:'0 0 40px rgba(56,189,248,0.08), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(56,189,248,0.04)',
               animation:'borderFlow 4s ease-in-out infinite',
+              overflow:'hidden',
             }}>
+              {/* Corner brackets */}
+              <div style={{ position:'absolute', top:'10px', left:'10px', width:'14px', height:'14px', borderTop:'1.5px solid rgba(56,189,248,0.5)', borderLeft:'1.5px solid rgba(56,189,248,0.5)' }} />
+              <div style={{ position:'absolute', top:'10px', right:'10px', width:'14px', height:'14px', borderTop:'1.5px solid rgba(56,189,248,0.5)', borderRight:'1.5px solid rgba(56,189,248,0.5)' }} />
+              <div style={{ position:'absolute', bottom:'10px', left:'10px', width:'14px', height:'14px', borderBottom:'1.5px solid rgba(56,189,248,0.5)', borderLeft:'1.5px solid rgba(56,189,248,0.5)' }} />
+              <div style={{ position:'absolute', bottom:'10px', right:'10px', width:'14px', height:'14px', borderBottom:'1.5px solid rgba(56,189,248,0.5)', borderRight:'1.5px solid rgba(56,189,248,0.5)' }} />
               {/* Inner scan line */}
               <div style={{ position:'absolute', left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(56,189,248,0.08),transparent)', animation:'scanLine 4s linear infinite', pointerEvents:'none' }} />
 

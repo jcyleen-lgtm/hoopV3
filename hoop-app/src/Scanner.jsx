@@ -161,7 +161,7 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
       }}>
         <HoopLogoSVG />
       </div>
-      <span style={{ fontSize: TYPE.md, fontWeight: '800', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '-0.3px' }}>Hoop</span>
+      <span style={{ fontSize: TYPE.md, fontWeight: '700', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '0.12em', fontFamily: "'Orbitron', monospace" }}>HOOP</span>
     </div>
 
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -188,7 +188,7 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
 
 const GlobalStyles = ({ colors }) => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       height: 100%;
@@ -199,8 +199,9 @@ const GlobalStyles = ({ colors }) => (
     }
     body {
       background: ${colors.bgGrad || colors.bg};
-      font-family: 'Inter', sans-serif;
+      font-family: 'Rajdhani', 'Inter', sans-serif;
       -webkit-font-smoothing: antialiased;
+      letter-spacing: 0.02em;
     }
     @keyframes hpBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
     #reader video { border-radius: 14px !important; object-fit: cover; }
