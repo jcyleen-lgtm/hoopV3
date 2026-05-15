@@ -177,36 +177,38 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
   // ── Render ────────────────────────────────────────────────────
   const Greeting = () => {
     const hour = new Date().getHours();
-    const timeLabel = hour < 5 ? 'Selamat malam' : hour < 12 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam';
+    const timeLabel = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 20 ? 'Good evening' : 'Good night';
     const motivasi = hour < 5
-      ? 'Masih lembur? Kamu luar biasa, jaga stamina ya 🌙'
+      ? 'Still grinding? You're a legend — rest when you can.'
       : hour < 9
-      ? 'Hari baru, target baru. Ayo kejar! 🚀'
+      ? 'New day, new target. Let's go!'
       : hour < 12
-      ? 'Pagi produktif, semangat penuh! Keep going 🔥'
+      ? 'Morning energy. Stay sharp and keep pushing.'
       : hour < 14
-      ? 'Tetap fokus, siang ini kita selesaikan semua! 💡'
+      ? 'Midday focus. Finish strong.'
       : hour < 17
-      ? 'Sore ini masih ada waktu, maksimalkan! ⚡'
+      ? 'Afternoon grind. You've got this.'
       : hour < 20
-      ? 'Penutup hari yang hebat, habiskan sepenuh hati! 🏁'
-      : 'Lembur mode ON — tim terbaik ga kenal menyerah 💯';
+      ? 'Closing shift — give it everything you've got.'
+      : 'Overtime mode ON. The best teams never quit.';
 
     return (
       <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginBottom: '4px' }}>
-            {timeLabel}
+          {/* "Good Morning, Name." style */}
+          <div style={{ fontSize: isDesktop ? '22px' : '18px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: '5px' }}>
+            {timeLabel},{' '}
+            <span style={{ color: '#60A5FA', textShadow: isLight ? 'none' : '0 0 16px rgba(96,165,250,0.5)' }}>
+              {user?.name || 'Admin'}
+            </span>
+            <span style={{ color: '#60A5FA', marginLeft: '2px' }}>.</span>
           </div>
-          <div style={{ fontSize: isDesktop ? '26px' : '22px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.6px', lineHeight: 1, marginBottom: '6px' }}>
-            {user?.name || 'Admin'}
-          </div>
-          {/* Motivasi */}
+          {/* Motivasi subtitle */}
           <div style={{
-            fontSize: '11px', fontWeight: '600',
-            color: isLight ? 'rgba(30,60,120,0.55)' : 'rgba(148,185,230,0.55)',
-            lineHeight: 1.4, marginBottom: '8px',
-            maxWidth: isDesktop ? '320px' : '220px',
+            fontSize: isDesktop ? '13px' : '12px', fontWeight: '500',
+            color: isLight ? 'rgba(30,60,120,0.5)' : 'rgba(148,185,230,0.5)',
+            lineHeight: 1.4, marginBottom: '10px',
+            maxWidth: isDesktop ? '360px' : '240px',
           }}>
             {motivasi}
           </div>
