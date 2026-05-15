@@ -1,208 +1,333 @@
-import React, { useState } from 'react';
-import { FONT, RADIUS, TYPE } from '../theme';
+import React, { useState, useEffect, useRef } from 'react';
+import { FONT } from '../theme';
 
+// ── Hoop Logo ────────────────────────────────────────────────────
 const HoopLogo = () => (
-  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-    <rect x="4" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
-    <rect x="15" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
-    <rect x="26" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
-    <rect x="4" y="16" width="28" height="5" rx="2.5" fill="white" opacity="0.5"/>
-    <circle cx="18" cy="18.5" r="3.5" fill="#60A5FA" opacity="0.95"/>
+  <svg width="40" height="40" viewBox="0 0 36 36" fill="none">
+    <rect x="4" y="8" width="6" height="20" rx="3" fill="white" opacity="0.95"/>
+    <rect x="15" y="8" width="6" height="20" rx="3" fill="white" opacity="0.95"/>
+    <rect x="26" y="8" width="6" height="20" rx="3" fill="white" opacity="0.95"/>
+    <rect x="4" y="16" width="28" height="5" rx="2.5" fill="white" opacity="0.4"/>
+    <circle cx="18" cy="18.5" r="4" fill="#38BDF8" opacity="1"/>
   </svg>
 );
+
+const BOOT_LINES = [
+  'INITIALIZING HOOP CORE...',
+  'CONNECTING WAREHOUSE NODE...',
+  'LOADING AI PACKING ENGINE...',
+  'SECURITY LAYER ACTIVE',
+  'ALL SYSTEMS NOMINAL',
+];
+
+const STATUS_LINES = [
+  '> SYSTEM ONLINE',
+  '> INVENTORY LINKED',
+  '> AI PACKING READY',
+  '> NODE STATUS : STABLE',
+  '> WAREHOUSE INTELLIGENCE : ACTIVE',
+];
 
 const LoginPage = ({ onLogin, isLoading }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [phase, setPhase]       = useState('boot');   // boot | login | auth
+  const [bootIdx, setBootIdx]   = useState(0);
+  const [bootPct, setBootPct]   = useState(0);
+  const [statusIdx, setStatusIdx] = useState(0);
+  const [authStep, setAuthStep] = useState(0);
+  const canvasRef = useRef(null);
+  const particlesRef = useRef([]);
+  const rafRef = useRef(null);
 
+  // ── Particle canvas ───────────────────────────────────────────
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    resize();
+    window.addEventListener('resize', resize);
+
+    particlesRef.current = Array.from({ length: 60 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r: Math.random() * 1.5 + 0.3,
+      a: Math.random() * 0.4 + 0.1,
+    }));
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particlesRef.current.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56,189,248,${p.a})`;
+        ctx.fill();
+      });
+      rafRef.current = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(rafRef.current); };
+  }, []);
+
+  // ── Boot sequence ─────────────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'boot') return;
+    const totalLines = BOOT_LINES.length;
+    let line = 0;
+
+    const next = () => {
+      if (line < totalLines) {
+        setBootIdx(line);
+        setBootPct(Math.round(((line + 1) / totalLines) * 100));
+        line++;
+        setTimeout(next, 480 + Math.random() * 200);
+      } else {
+        setTimeout(() => setPhase('login'), 600);
+      }
+    };
+    const t = setTimeout(next, 300);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  // ── Rotating status text ──────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'login') return;
+    const interval = setInterval(() => setStatusIdx(i => (i + 1) % STATUS_LINES.length), 2200);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  // ── Auth animation ────────────────────────────────────────────
   const handleSubmit = () => {
-    if (!isLoading && username.trim() && password.trim()) {
-      onLogin(username.trim(), password.trim());
-    }
+    if (!username.trim() || !password.trim() || isLoading) return;
+    setPhase('auth');
+    setAuthStep(0);
+    const steps = [0, 1, 2, 3];
+    steps.forEach((s, i) => setTimeout(() => setAuthStep(s + 1), i * 600));
+    setTimeout(() => onLogin(username.trim(), password.trim()), steps.length * 600 + 200);
   };
 
   return (
-    <div style={{
-      height: '100dvh', fontFamily: FONT,
-      background: '#020810',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: '24px', position: 'fixed', inset: 0, overflow: 'hidden',
-    }}>
+    <div style={{ position: 'fixed', inset: 0, background: '#020914', overflow: 'hidden', fontFamily: "'Rajdhani', 'Orbitron', monospace" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
 
-        @keyframes floatOrb1 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-30px) scale(1.05)} }
-        @keyframes floatOrb2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-15px,25px) scale(1.03)} }
-        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
-        @keyframes logoPulse { 0%,100%{box-shadow:0 0 24px rgba(59,130,196,0.4),0 0 48px rgba(59,130,196,0.15),inset 0 1px 0 rgba(255,255,255,0.1)} 50%{box-shadow:0 0 36px rgba(96,165,250,0.55),0 0 72px rgba(59,130,196,0.25),inset 0 1px 0 rgba(255,255,255,0.15)} }
-        @keyframes borderGlow { 0%,100%{opacity:0.6} 50%{opacity:1} }
-        @keyframes scanLine { 0%{transform:translateY(-100%)} 100%{transform:translateY(400%)} }
+        @keyframes gridMove { from{background-position:0 0} to{background-position:40px 40px} }
+        @keyframes scanLine { 0%{top:-2px;opacity:0.7} 100%{top:100%;opacity:0} }
+        @keyframes pulse { 0%,100%{opacity:0.6;transform:scale(1)} 50%{opacity:1;transform:scale(1.02)} }
+        @keyframes glowPulse { 0%,100%{box-shadow:0 0 30px rgba(56,189,248,0.25),0 0 60px rgba(56,189,248,0.1)} 50%{box-shadow:0 0 50px rgba(56,189,248,0.4),0 0 100px rgba(56,189,248,0.2)} }
+        @keyframes borderFlow { 0%{border-color:rgba(56,189,248,0.3)} 50%{border-color:rgba(56,189,248,0.7)} 100%{border-color:rgba(56,189,248,0.3)} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes authPulse { 0%,100%{transform:scale(1);opacity:0.8} 50%{transform:scale(1.15);opacity:1} }
+        @keyframes logoBreathe { 0%,100%{filter:drop-shadow(0 0 12px rgba(56,189,248,0.6))} 50%{filter:drop-shadow(0 0 24px rgba(56,189,248,0.9))} }
+        @keyframes statusFade { 0%{opacity:0;transform:translateX(-4px)} 15%,85%{opacity:1;transform:none} 100%{opacity:0} }
 
-        .login-card { animation: fadeUp 0.7s cubic-bezier(.22,1,.36,1) forwards; }
-        .orb1 { animation: floatOrb1 10s ease-in-out infinite; }
-        .orb2 { animation: floatOrb2 13s ease-in-out infinite; }
-        .orb3 { animation: floatOrb1 16s ease-in-out infinite reverse; }
-        .logo-box { animation: logoPulse 3.5s ease-in-out infinite; }
-        .border-glow { animation: borderGlow 3s ease-in-out infinite; }
+        .hoop-input {
+          width:100%; height:48px; background:rgba(2,15,35,0.7);
+          border:1px solid rgba(56,189,248,0.25); border-radius:8px;
+          padding:0 16px 0 44px; color:#E8F4FF;
+          font-size:15px; font-family:'Rajdhani',sans-serif; font-weight:500;
+          outline:none; transition:all 0.2s; letter-spacing:0.05em;
+          backdrop-filter:blur(10px);
+        }
+        .hoop-input::placeholder { color:rgba(56,189,248,0.3); letter-spacing:0.08em; }
+        .hoop-input:focus {
+          border-color:rgba(56,189,248,0.7);
+          background:rgba(4,20,50,0.8);
+          box-shadow:0 0 0 3px rgba(56,189,248,0.08), 0 0 24px rgba(56,189,248,0.12), inset 0 0 20px rgba(56,189,248,0.03);
+        }
+        .hoop-btn {
+          width:100%; height:48px; border:1px solid rgba(56,189,248,0.5);
+          border-radius:8px; cursor:pointer; font-size:16px; font-weight:700;
+          font-family:'Orbitron',monospace; letter-spacing:0.15em; color:#fff;
+          background:linear-gradient(135deg,rgba(2,30,80,0.9),rgba(14,60,150,0.9));
+          box-shadow:0 0 24px rgba(56,189,248,0.3),inset 0 1px 0 rgba(255,255,255,0.08);
+          transition:all 0.2s; position:relative; overflow:hidden;
+        }
+        .hoop-btn:hover:not(:disabled) {
+          box-shadow:0 0 40px rgba(56,189,248,0.5),inset 0 1px 0 rgba(255,255,255,0.12);
+          border-color:rgba(56,189,248,0.8); transform:translateY(-1px);
+        }
+        .hoop-btn:disabled { opacity:0.4; cursor:not-allowed; }
+        .hoop-btn::after { content:''; position:absolute; top:0; left:-100%; width:50%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent); transition:left 0.5s; }
+        .hoop-btn:hover:not(:disabled)::after { left:150%; }
 
-        .glass-input {
-          width: 100%; height: 52px;
-          background: rgba(6,18,40,0.5);
-          border: 1px solid rgba(96,165,250,0.15);
-          border-radius: 14px;
-          padding: 0 16px 0 44px;
-          color: #E8F4FF; font-size: 14px; font-family: inherit;
-          outline: none; transition: all 0.25s;
-          backdrop-filter: blur(12px);
+        .corner-tl::before,.corner-tl::after,.corner-br::before,.corner-br::after {
+          content:''; position:absolute; width:16px; height:16px;
         }
-        .glass-input::placeholder { color: rgba(148,185,230,0.3); }
-        .glass-input:focus {
-          border-color: rgba(96,165,250,0.5);
-          background: rgba(8,24,52,0.6);
-          box-shadow: 0 0 0 3px rgba(96,165,250,0.08), 0 0 20px rgba(59,130,196,0.1), inset 0 1px 0 rgba(255,255,255,0.04);
-        }
-        .login-btn {
-          width: 100%; height: 52px; border: none; border-radius: 14px; cursor: pointer;
-          font-size: 15px; font-weight: 700; font-family: inherit;
-          background: linear-gradient(135deg, #1E3A6E 0%, #2563EB 50%, #3B82F6 100%);
-          background-size: 200% auto;
-          color: white; letter-spacing: 0.03em;
-          box-shadow: 0 0 24px rgba(59,130,196,0.4), 0 4px 20px rgba(37,99,235,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
-          transition: all 0.25s;
-          position: relative; overflow: hidden;
-        }
-        .login-btn::after {
-          content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
-          background: linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
-          transition: left 0.5s;
-        }
-        .login-btn:hover:not(:disabled)::after { left:150%; }
-        .login-btn:hover:not(:disabled) {
-          box-shadow: 0 0 36px rgba(96,165,250,0.55), 0 8px 32px rgba(37,99,235,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
-          transform: translateY(-1px);
-        }
-        .login-btn:active:not(:disabled) { transform: translateY(0); }
-        .login-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+        .corner-tl::before { top:0; left:0; border-top:2px solid rgba(56,189,248,0.6); border-left:2px solid rgba(56,189,248,0.6); }
+        .corner-tl::after  { bottom:0; right:0; border-bottom:2px solid rgba(56,189,248,0.6); border-right:2px solid rgba(56,189,248,0.6); }
       `}</style>
 
-      {/* Deep bg gradient */}
-      <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 25% 15%, #0D1F3C 0%, #020810 55%), radial-gradient(ellipse at 80% 85%, #081428 0%, transparent 55%)', pointerEvents:'none' }} />
+      {/* Particle canvas */}
+      <canvas ref={canvasRef} style={{ position:'absolute', inset:0, zIndex:0, opacity:0.7 }} />
 
-      {/* Floating ambient orbs */}
-      <div className="orb1" style={{ position:'absolute', top:'-15%', left:'-10%', width:'500px', height:'500px', borderRadius:'50%', background:'radial-gradient(circle, rgba(37,99,235,0.14) 0%, transparent 65%)', pointerEvents:'none' }} />
-      <div className="orb2" style={{ position:'absolute', bottom:'-20%', right:'-10%', width:'600px', height:'600px', borderRadius:'50%', background:'radial-gradient(circle, rgba(30,58,92,0.2) 0%, transparent 60%)', pointerEvents:'none' }} />
-      <div className="orb3" style={{ position:'absolute', top:'40%', right:'5%', width:'300px', height:'300px', borderRadius:'50%', background:'radial-gradient(circle, rgba(96,165,250,0.06) 0%, transparent 65%)', pointerEvents:'none' }} />
+      {/* Animated grid */}
+      <div style={{
+        position:'absolute', inset:0, zIndex:0,
+        backgroundImage:'linear-gradient(rgba(56,189,248,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.04) 1px,transparent 1px)',
+        backgroundSize:'40px 40px',
+        animation:'gridMove 8s linear infinite',
+      }} />
 
-      {/* Subtle grid */}
-      <div style={{ position:'absolute', inset:0, pointerEvents:'none', backgroundImage:'linear-gradient(rgba(96,165,250,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(96,165,250,0.025) 1px, transparent 1px)', backgroundSize:'48px 48px' }} />
+      {/* Scan line */}
+      <div style={{ position:'absolute', left:0, right:0, height:'2px', background:'linear-gradient(90deg,transparent,rgba(56,189,248,0.15),rgba(56,189,248,0.4),rgba(56,189,248,0.15),transparent)', zIndex:1, animation:'scanLine 5s linear infinite', pointerEvents:'none' }} />
 
-      <div className="login-card" style={{ width:'100%', maxWidth:'400px', position:'relative', zIndex:1 }}>
+      {/* Ambient glows */}
+      <div style={{ position:'absolute', top:'-20%', left:'50%', transform:'translateX(-50%)', width:'600px', height:'400px', borderRadius:'50%', background:'radial-gradient(circle,rgba(14,60,150,0.35) 0%,transparent 70%)', zIndex:0, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'-15%', left:'20%', width:'400px', height:'300px', borderRadius:'50%', background:'radial-gradient(circle,rgba(56,189,248,0.06) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
+      <div style={{ position:'absolute', bottom:'-15%', right:'15%', width:'350px', height:'280px', borderRadius:'50%', background:'radial-gradient(circle,rgba(14,60,150,0.12) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
 
-        {/* Logo */}
-        <div style={{ textAlign:'center', marginBottom:'36px' }}>
-          <div className="logo-box" style={{
-            width:'80px', height:'80px', borderRadius:'26px', margin:'0 auto 20px',
-            background:'linear-gradient(135deg, #060F20 0%, #0D2040 50%, #1A3A6E 100%)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-            border:'1px solid rgba(96,165,250,0.25)',
-          }}>
+      {/* ── BOOT PHASE ── */}
+      {phase === 'boot' && (
+        <div style={{ position:'relative', zIndex:10, height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'0', animation:'fadeUp 0.4s ease' }}>
+          {/* Logo */}
+          <div style={{ width:'72px', height:'72px', borderRadius:'20px', background:'linear-gradient(135deg,#060F20,#0D2040,#1A3A6E)', border:'1px solid rgba(56,189,248,0.3)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'28px', animation:'glowPulse 2.5s ease-in-out infinite, logoBreathe 2.5s ease-in-out infinite' }}>
             <HoopLogo />
           </div>
-          <h1 style={{ fontSize:'34px', fontWeight:'900', color:'#fff', letterSpacing:'-1px', marginBottom:'6px', textShadow:'0 0 30px rgba(96,165,250,0.25)' }}>
-            HOOP
-          </h1>
-          <p style={{ fontSize:'11px', color:'rgba(148,185,230,0.4)', letterSpacing:'0.12em', textTransform:'uppercase', fontWeight:'600' }}>
-            Warehouse Packing System
-          </p>
-        </div>
+          <h1 style={{ fontFamily:"'Orbitron',monospace", fontSize:'28px', fontWeight:'900', color:'#fff', letterSpacing:'0.25em', margin:'0 0 4px', textShadow:'0 0 30px rgba(56,189,248,0.4)' }}>HOOP</h1>
+          <p style={{ fontFamily:"'Rajdhani',sans-serif", fontSize:'11px', color:'rgba(56,189,248,0.5)', letterSpacing:'0.2em', textTransform:'uppercase', margin:'0 0 40px' }}>Warehouse Intelligence System</p>
 
-        {/* Volumetric glass card */}
-        <div style={{ position:'relative' }}>
-
-          {/* Outer glow layer */}
-          <div className="border-glow" style={{
-            position:'absolute', inset:'-1px',
-            borderRadius:'26px',
-            background:'transparent',
-            boxShadow:'0 0 40px rgba(37,99,235,0.18), 0 0 80px rgba(37,99,235,0.08), 0 20px 60px rgba(37,99,235,0.12)',
-            pointerEvents:'none',
-          }} />
-
-          {/* Bottom edge stronger glow */}
-          <div style={{
-            position:'absolute', bottom:'-2px', left:'10%', right:'10%', height:'3px',
-            background:'linear-gradient(90deg,transparent,rgba(59,130,196,0.5),rgba(96,165,250,0.6),rgba(59,130,196,0.5),transparent)',
-            borderRadius:'0 0 4px 4px',
-            boxShadow:'0 0 20px rgba(96,165,250,0.4), 0 0 40px rgba(59,130,196,0.2)',
-            filter:'blur(0.5px)',
-            pointerEvents:'none',
-          }} />
-
-          {/* Left edge glow */}
-          <div style={{ position:'absolute', left:'-1px', top:'15%', bottom:'15%', width:'1px', background:'linear-gradient(180deg,transparent,rgba(59,130,196,0.35),rgba(96,165,250,0.25),transparent)', pointerEvents:'none' }} />
-          {/* Right edge glow */}
-          <div style={{ position:'absolute', right:'-1px', top:'15%', bottom:'15%', width:'1px', background:'linear-gradient(180deg,transparent,rgba(59,130,196,0.35),rgba(96,165,250,0.25),transparent)', pointerEvents:'none' }} />
-
-          {/* Glass card body */}
-          <div style={{
-            background:'rgba(6,14,30,0.65)',
-            backdropFilter:'blur(32px)',
-            WebkitBackdropFilter:'blur(32px)',
-            border:'1px solid rgba(96,165,250,0.12)',
-            borderRadius:'24px',
-            padding:'32px 28px',
-            boxShadow:'0 32px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(59,130,196,0.06)',
-            position:'relative', overflow:'hidden',
-          }}>
-
-            {/* Subtle scan line */}
-            <div className="scan-line" style={{
-              position:'absolute', left:0, right:0, height:'1px',
-              background:'linear-gradient(90deg,transparent,rgba(96,165,250,0.08),transparent)',
-              animation:'scanLine 6s linear infinite',
-              pointerEvents:'none',
-            }} />
-
-            {/* Inner top reflection */}
-            <div style={{ position:'absolute', top:0, left:'20%', right:'20%', height:'1px', background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent)', pointerEvents:'none' }} />
-
-            <p style={{ fontSize:TYPE.xs, fontWeight:'700', letterSpacing:'0.12em', textTransform:'uppercase', color:'rgba(148,185,230,0.25)', marginBottom:'22px' }}>
-              Sign in to continue
-            </p>
-
-            {/* Username */}
-            <div style={{ position:'relative', marginBottom:'12px' }}>
-              <div style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(96,165,250,0.45)" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          {/* Boot lines */}
+          <div style={{ width:'340px', marginBottom:'24px' }}>
+            {BOOT_LINES.slice(0, bootIdx + 1).map((line, i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px', opacity: i < bootIdx ? 0.4 : 1, transition:'opacity 0.3s' }}>
+                <div style={{ width:'6px', height:'6px', borderRadius:'50%', background: i < bootIdx ? 'rgba(56,189,248,0.4)' : '#38BDF8', boxShadow: i === bootIdx ? '0 0 8px #38BDF8' : 'none', flexShrink:0 }} />
+                <span style={{ fontFamily:"'Rajdhani',monospace", fontSize:'12px', color: i < bootIdx ? 'rgba(56,189,248,0.5)' : 'rgba(56,189,248,0.9)', letterSpacing:'0.08em', fontWeight:'600' }}>
+                  {line}
+                  {i === bootIdx && <span style={{ animation:'blink 0.8s step-end infinite' }}>_</span>}
+                </span>
+                {i < bootIdx && <span style={{ marginLeft:'auto', fontSize:'10px', color:'rgba(56,189,248,0.4)', fontFamily:'monospace' }}>OK</span>}
               </div>
-              <input className="glass-input" type="text" placeholder="Username"
-                value={username} onChange={e => setUsername(e.target.value)}
-                disabled={isLoading} autoComplete="off" />
-            </div>
+            ))}
+          </div>
 
-            {/* Password */}
-            <div style={{ position:'relative', marginBottom:'26px' }}>
-              <div style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(96,165,250,0.45)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              </div>
-              <input className="glass-input" type="password" placeholder="Password"
-                value={password} onChange={e => setPassword(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                disabled={isLoading} />
+          {/* Progress bar */}
+          <div style={{ width:'340px' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px' }}>
+              <span style={{ fontFamily:"'Rajdhani',monospace", fontSize:'10px', color:'rgba(56,189,248,0.4)', letterSpacing:'0.1em' }}>SYSTEM LOAD</span>
+              <span style={{ fontFamily:"'Orbitron',monospace", fontSize:'10px', color:'#38BDF8' }}>{bootPct}%</span>
             </div>
-
-            <button className="login-btn" onClick={handleSubmit}
-              disabled={isLoading || !username.trim() || !password.trim()}>
-              {isLoading ? 'Signing in…' : 'Masuk →'}
-            </button>
+            <div style={{ height:'3px', background:'rgba(56,189,248,0.1)', borderRadius:'2px', overflow:'hidden' }}>
+              <div style={{ height:'100%', width:`${bootPct}%`, background:'linear-gradient(90deg,#0EA5E9,#38BDF8)', borderRadius:'2px', boxShadow:'0 0 8px rgba(56,189,248,0.6)', transition:'width 0.4s ease' }} />
+            </div>
           </div>
         </div>
+      )}
 
-        <p style={{ textAlign:'center', marginTop:'24px', fontSize:TYPE.xs, color:'rgba(148,185,230,0.15)', letterSpacing:'0.04em' }}>
-          Hoop © {new Date().getFullYear()} · Warehouse Intelligence
-        </p>
-      </div>
+      {/* ── LOGIN PHASE ── */}
+      {phase === 'login' && (
+        <div style={{ position:'relative', zIndex:10, height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', animation:'fadeUp 0.5s ease' }}>
+
+          {/* Logo + title */}
+          <div style={{ textAlign:'center', marginBottom:'32px' }}>
+            <div style={{ width:'80px', height:'80px', borderRadius:'24px', background:'linear-gradient(135deg,#060F20,#0D2040,#1A3A6E)', border:'1px solid rgba(56,189,248,0.3)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 18px', animation:'glowPulse 3s ease-in-out infinite, logoBreathe 3s ease-in-out infinite' }}>
+              <HoopLogo />
+            </div>
+            <h1 style={{ fontFamily:"'Orbitron',monospace", fontSize:'32px', fontWeight:'900', color:'#fff', letterSpacing:'0.25em', margin:'0 0 6px', textShadow:'0 0 30px rgba(56,189,248,0.35)' }}>HOOP</h1>
+            <p style={{ fontFamily:"'Rajdhani',sans-serif", fontSize:'11px', color:'rgba(56,189,248,0.45)', letterSpacing:'0.2em', textTransform:'uppercase', margin:0 }}>Warehouse Packing System</p>
+          </div>
+
+          {/* Glass card */}
+          <div style={{ position:'relative', width:'100%', maxWidth:'420px', padding:'0 20px' }}>
+            {/* Outer glow */}
+            <div style={{ position:'absolute', inset:'-1px', borderRadius:'18px', boxShadow:'0 0 50px rgba(56,189,248,0.15),0 0 100px rgba(56,189,248,0.06)', pointerEvents:'none', animation:'glowPulse 4s ease-in-out infinite' }} />
+
+            {/* Bottom edge glow */}
+            <div style={{ position:'absolute', bottom:'19px', left:'30%', right:'30%', height:'1px', background:'linear-gradient(90deg,transparent,rgba(56,189,248,0.6),transparent)', boxShadow:'0 0 12px rgba(56,189,248,0.4)', pointerEvents:'none' }} />
+
+            <div className="corner-tl" style={{
+              position:'relative',
+              background:'rgba(4,12,30,0.75)',
+              backdropFilter:'blur(32px)',
+              WebkitBackdropFilter:'blur(32px)',
+              border:'1px solid rgba(56,189,248,0.15)',
+              borderRadius:'16px',
+              padding:'28px 24px',
+              boxShadow:'inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(56,189,248,0.04)',
+              animation:'borderFlow 4s ease-in-out infinite',
+            }}>
+              {/* Inner scan line */}
+              <div style={{ position:'absolute', left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(56,189,248,0.08),transparent)', animation:'scanLine 4s linear infinite', pointerEvents:'none' }} />
+
+              {/* Status text */}
+              <div style={{ display:'flex', alignItems:'center', gap:'6px', marginBottom:'20px' }}>
+                <div style={{ width:'5px', height:'5px', borderRadius:'50%', background:'#38BDF8', boxShadow:'0 0 6px #38BDF8', animation:'pulse 1.5s ease-in-out infinite' }} />
+                <span style={{ fontFamily:"'Rajdhani',monospace", fontSize:'11px', color:'rgba(56,189,248,0.6)', letterSpacing:'0.12em', fontWeight:'600', animation:'statusFade 2.2s ease-in-out infinite' }}>
+                  {STATUS_LINES[statusIdx]}
+                </span>
+              </div>
+
+              <p style={{ fontFamily:"'Rajdhani',sans-serif", fontSize:'10px', fontWeight:'700', letterSpacing:'0.15em', textTransform:'uppercase', color:'rgba(56,189,248,0.3)', marginBottom:'18px' }}>
+                Authentication Required
+              </p>
+
+              {/* Username */}
+              <div style={{ position:'relative', marginBottom:'10px' }}>
+                <div style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(56,189,248,0.45)" strokeWidth="2" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <input className="hoop-input" type="text" placeholder="USERNAME"
+                  value={username} onChange={e => setUsername(e.target.value)}
+                  disabled={isLoading} autoComplete="off" />
+              </div>
+
+              {/* Password */}
+              <div style={{ position:'relative', marginBottom:'22px' }}>
+                <div style={{ position:'absolute', left:'14px', top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(56,189,248,0.45)" strokeWidth="2" strokeLinecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <input className="hoop-input" type="password" placeholder="PASSWORD"
+                  value={password} onChange={e => setPassword(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                  disabled={isLoading} />
+              </div>
+
+              <button className="hoop-btn" onClick={handleSubmit}
+                disabled={isLoading || !username.trim() || !password.trim()}>
+                MASUK →
+              </button>
+            </div>
+          </div>
+
+          <p style={{ marginTop:'20px', fontFamily:"'Rajdhani',monospace", fontSize:'10px', color:'rgba(56,189,248,0.18)', letterSpacing:'0.1em' }}>
+            HOOP © {new Date().getFullYear()} · WAREHOUSE INTELLIGENCE
+          </p>
+        </div>
+      )}
+
+      {/* ── AUTH PHASE ── */}
+      {phase === 'auth' && (
+        <div style={{ position:'relative', zIndex:10, height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'20px', animation:'fadeUp 0.3s ease' }}>
+          {/* Spinning ring */}
+          <div style={{ position:'relative', width:'100px', height:'100px' }}>
+            <div style={{ position:'absolute', inset:0, borderRadius:'50%', border:'2px solid rgba(56,189,248,0.1)', boxShadow:'0 0 20px rgba(56,189,248,0.1)' }} />
+            <div style={{ position:'absolute', inset:0, borderRadius:'50%', border:'2px solid transparent', borderTopColor:'#38BDF8', animation:'spin 0.8s linear infinite', boxShadow:'0 0 16px rgba(56,189,248,0.4)' }} />
+            <div style={{ position:'absolute', inset:'12px', borderRadius:'50%', border:'1px solid rgba(56,189,248,0.2)', borderBottomColor:'#38BDF8', animation:'spin 1.2s linear infinite reverse' }} />
+            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <HoopLogo />
+            </div>
+          </div>
+
+          <div style={{ textAlign:'center' }}>
+            {['AUTHENTICATING...','VERIFYING CREDENTIALS...','ACCESS GRANTED','LOADING WORKSPACE...'].slice(0, authStep).map((line, i) => (
+              <div key={i} style={{ fontFamily:"'Rajdhani',monospace", fontSize:'13px', fontWeight:'600', letterSpacing:'0.12em', color: i === authStep - 1 ? '#38BDF8' : 'rgba(56,189,248,0.35)', marginBottom:'4px', animation:'fadeUp 0.3s ease' }}>
+                {i === authStep - 1 && <span style={{ marginRight:'6px', animation:'blink 0.5s step-end infinite' }}>▶</span>}
+                {line}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
