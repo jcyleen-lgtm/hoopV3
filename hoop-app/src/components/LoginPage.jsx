@@ -12,12 +12,11 @@ const HoopLogo = () => (
   </svg>
 );
 
-const BOOT_LINES = [
-  'INITIALIZING HOOP CORE...',
-  'CONNECTING WAREHOUSE NODE...',
-  'LOADING AI PACKING ENGINE...',
-  'SECURITY LAYER ACTIVE',
-  'ALL SYSTEMS NOMINAL',
+const AUTH_LINES = [
+  'AUTHENTICATING...',
+  'VERIFYING CREDENTIALS...',
+  'ACCESS GRANTED',
+  'LOADING WORKSPACE...',
 ];
 
 const STATUS_LINES = [
@@ -31,9 +30,7 @@ const STATUS_LINES = [
 const LoginPage = ({ onLogin, isLoading }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [phase, setPhase]       = useState('boot');   // boot | login | auth
-  const [bootIdx, setBootIdx]   = useState(0);
-  const [bootPct, setBootPct]   = useState(0);
+  const [phase, setPhase]       = useState('welcome'); // welcome | login | auth
   const [statusIdx, setStatusIdx] = useState(0);
   const [authStep, setAuthStep] = useState(0);
   const canvasRef = useRef(null);
@@ -77,23 +74,10 @@ const LoginPage = ({ onLogin, isLoading }) => {
     return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  // ── Boot sequence ─────────────────────────────────────────────
+  // ── Welcome → login transition ───────────────────────────────
   useEffect(() => {
-    if (phase !== 'boot') return;
-    const totalLines = BOOT_LINES.length;
-    let line = 0;
-
-    const next = () => {
-      if (line < totalLines) {
-        setBootIdx(line);
-        setBootPct(Math.round(((line + 1) / totalLines) * 100));
-        line++;
-        setTimeout(next, 480 + Math.random() * 200);
-      } else {
-        setTimeout(() => setPhase('login'), 600);
-      }
-    };
-    const t = setTimeout(next, 300);
+    if (phase !== 'welcome') return;
+    const t = setTimeout(() => setPhase('login'), 2000);
     return () => clearTimeout(t);
   }, [phase]);
 
@@ -109,9 +93,9 @@ const LoginPage = ({ onLogin, isLoading }) => {
     if (!username.trim() || !password.trim() || isLoading) return;
     setPhase('auth');
     setAuthStep(0);
-    const steps = [0, 1, 2, 3];
-    steps.forEach((s, i) => setTimeout(() => setAuthStep(s + 1), i * 600));
-    setTimeout(() => onLogin(username.trim(), password.trim()), steps.length * 600 + 200);
+    const steps = AUTH_LINES.map((_, i) => i);
+    steps.forEach((s, i) => setTimeout(() => setAuthStep(s + 1), i * 500));
+    setTimeout(() => onLogin(username.trim(), password.trim()), steps.length * 500 + 200);
   };
 
   return (
@@ -186,39 +170,16 @@ const LoginPage = ({ onLogin, isLoading }) => {
       <div style={{ position:'absolute', bottom:'20%', left:'5%', width:'200px', height:'200px', borderRadius:'50%', background:'radial-gradient(circle,rgba(56,189,248,0.05) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
       <div style={{ position:'absolute', top:'15%', right:'8%', width:'180px', height:'180px', borderRadius:'50%', background:'radial-gradient(circle,rgba(56,189,248,0.06) 0%,transparent 65%)', zIndex:0, pointerEvents:'none' }} />
 
-      {/* ── BOOT PHASE ── */}
-      {phase === 'boot' && (
-        <div style={{ position:'relative', zIndex:10, height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'0', animation:'fadeUp 0.4s ease' }}>
-          {/* Logo */}
-          <div style={{ width:'72px', height:'72px', borderRadius:'20px', background:'linear-gradient(135deg,#060F20,#0D2040,#1A3A6E)', border:'1px solid rgba(56,189,248,0.3)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'28px', animation:'glowPulse 2.5s ease-in-out infinite, logoBreathe 2.5s ease-in-out infinite' }}>
+      {/* ── WELCOME PHASE ── */}
+      {phase === 'welcome' && (
+        <div style={{ position:'relative', zIndex:10, height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', animation:'fadeUp 0.6s ease' }}>
+          <div style={{ width:'90px', height:'90px', borderRadius:'26px', background:'linear-gradient(135deg,#060F20,#0D2040,#1A3A6E)', border:'1px solid rgba(56,189,248,0.3)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:'24px', animation:'glowPulse 2s ease-in-out infinite, logoBreathe 2s ease-in-out infinite' }}>
             <HoopLogo />
           </div>
-          <h1 style={{ fontFamily:"'Orbitron',monospace", fontSize:'28px', fontWeight:'900', color:'#fff', letterSpacing:'0.25em', margin:'0 0 4px', textShadow:'0 0 30px rgba(56,189,248,0.4)' }}>HOOP</h1>
-          <p style={{ fontFamily:"'Rajdhani',sans-serif", fontSize:'11px', color:'rgba(56,189,248,0.5)', letterSpacing:'0.2em', textTransform:'uppercase', margin:'0 0 40px' }}>Warehouse Intelligence System</p>
-
-          {/* Boot lines */}
-          <div style={{ width:'340px', marginBottom:'24px' }}>
-            {BOOT_LINES.slice(0, bootIdx + 1).map((line, i) => (
-              <div key={i} style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'8px', opacity: i < bootIdx ? 0.4 : 1, transition:'opacity 0.3s' }}>
-                <div style={{ width:'6px', height:'6px', borderRadius:'50%', background: i < bootIdx ? 'rgba(56,189,248,0.4)' : '#38BDF8', boxShadow: i === bootIdx ? '0 0 8px #38BDF8' : 'none', flexShrink:0 }} />
-                <span style={{ fontFamily:"'Rajdhani',monospace", fontSize:'12px', color: i < bootIdx ? 'rgba(56,189,248,0.5)' : 'rgba(56,189,248,0.9)', letterSpacing:'0.08em', fontWeight:'600' }}>
-                  {line}
-                  {i === bootIdx && <span style={{ animation:'blink 0.8s step-end infinite' }}>_</span>}
-                </span>
-                {i < bootIdx && <span style={{ marginLeft:'auto', fontSize:'10px', color:'rgba(56,189,248,0.4)', fontFamily:'monospace' }}>OK</span>}
-              </div>
-            ))}
-          </div>
-
-          {/* Progress bar */}
-          <div style={{ width:'340px' }}>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px' }}>
-              <span style={{ fontFamily:"'Rajdhani',monospace", fontSize:'10px', color:'rgba(56,189,248,0.4)', letterSpacing:'0.1em' }}>SYSTEM LOAD</span>
-              <span style={{ fontFamily:"'Orbitron',monospace", fontSize:'10px', color:'#38BDF8' }}>{bootPct}%</span>
-            </div>
-            <div style={{ height:'3px', background:'rgba(56,189,248,0.1)', borderRadius:'2px', overflow:'hidden' }}>
-              <div style={{ height:'100%', width:`${bootPct}%`, background:'linear-gradient(90deg,#0EA5E9,#38BDF8)', borderRadius:'2px', boxShadow:'0 0 8px rgba(56,189,248,0.6)', transition:'width 0.4s ease' }} />
-            </div>
+          <h1 style={{ fontFamily:"'Orbitron',monospace", fontSize:'36px', fontWeight:'900', color:'#fff', letterSpacing:'0.25em', margin:'0 0 8px', textShadow:'0 0 40px rgba(56,189,248,0.5)' }}>HOOP</h1>
+          <p style={{ fontFamily:"'Rajdhani',sans-serif", fontSize:'13px', color:'rgba(56,189,248,0.5)', letterSpacing:'0.2em', textTransform:'uppercase', margin:'0 0 28px' }}>Warehouse Intelligence System</p>
+          <div style={{ fontFamily:"'Rajdhani',sans-serif", fontSize:'16px', fontWeight:'600', color:'rgba(56,189,248,0.7)', letterSpacing:'0.12em' }}>
+            Welcome back<span style={{ animation:'blink 1s step-end infinite' }}>_</span>
           </div>
         </div>
       )}
@@ -324,7 +285,7 @@ const LoginPage = ({ onLogin, isLoading }) => {
           </div>
 
           <div style={{ textAlign:'center' }}>
-            {['AUTHENTICATING...','VERIFYING CREDENTIALS...','ACCESS GRANTED','LOADING WORKSPACE...'].slice(0, authStep).map((line, i) => (
+            {AUTH_LINES.slice(0, authStep).map((line, i) => (
               <div key={i} style={{ fontFamily:"'Rajdhani',monospace", fontSize:'13px', fontWeight:'600', letterSpacing:'0.12em', color: i === authStep - 1 ? '#38BDF8' : 'rgba(56,189,248,0.35)', marginBottom:'4px', animation:'fadeUp 0.3s ease' }}>
                 {i === authStep - 1 && <span style={{ marginRight:'6px', animation:'blink 0.5s step-end infinite' }}>▶</span>}
                 {line}
