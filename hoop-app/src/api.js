@@ -15,7 +15,10 @@ const fetchWithRetry = async (url, retries = 3, delay = 800) => {
 };
 
 export const callScript = (params) => {
-  const qs  = new URLSearchParams(params).toString();
+  const p = { ...params };
+  // saveScan harus selalu fresh — tambah timestamp untuk bypass cache
+  if (p.action === 'saveScan') p._t = Date.now();
+  const qs  = new URLSearchParams(p).toString();
   const url = `${PROXY_URL}?${qs}`;
   return fetchWithRetry(url);
 };

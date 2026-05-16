@@ -258,6 +258,8 @@ const ManualBox = ({ value, onChange, onKey, onSubmit, inputRef, colors, busy, c
         }}
         autoComplete="off"
         autoFocus
+        inputMode="none"
+        readOnly={false}
       />
       <button onClick={onSubmit} disabled={busy || !value.trim()} style={{
         height: '44px', padding: '0 14px',
