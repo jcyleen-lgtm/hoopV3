@@ -41,6 +41,19 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   }, []);
 
   const navigate = (p) => {
+    // Stop semua video stream sebelum pindah halaman
+    // supaya kamera tidak block navigasi di iOS
+    if (p !== 'scan') {
+      try {
+        const videos = document.querySelectorAll('video');
+        videos.forEach(v => {
+          if (v.srcObject) {
+            v.srcObject.getTracks().forEach(t => t.stop());
+            v.srcObject = null;
+          }
+        });
+      } catch (_) {}
+    }
     setPage(p);
     window.scrollTo(0, 0);
   };
