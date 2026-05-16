@@ -121,6 +121,7 @@ const NetworkBadge = ({ online, pendingCount, syncQueue, colors, isLight }) => (
 const ControlBar = ({ cam, setCam, mode, setMode, colors, isLight, theme, online, pendingCount, syncQueue }) => {
   const card = glassCard(theme);
   return (
+    <>
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
       <button
         onClick={() => setCam('')}
@@ -170,6 +171,7 @@ const ControlBar = ({ cam, setCam, mode, setMode, colors, isLight, theme, online
       </div>
     </div>
     <NetworkBadge online={online} pendingCount={pendingCount} syncQueue={syncQueue} colors={colors} isLight={isLight} />
+    </>
   );
 };
 
