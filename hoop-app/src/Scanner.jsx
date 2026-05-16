@@ -52,7 +52,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100%', background: colors.bgGrad || colors.bg, color: colors.text, fontFamily: FONT }}>
+    <div style={{ display: 'flex', height: '100%', background: colors.bgGrad || colors.bg, color: colors.text, fontFamily: FONT, paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <GlobalStyles colors={colors} />
 
       {/* Sidebar - Desktop Only */}
