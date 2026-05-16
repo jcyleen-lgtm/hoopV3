@@ -30,6 +30,8 @@ const SunIcon = () => (
 // Scanner no longer manages its own auth state.
 const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   const [page, setPage]         = useState('home');
+  const [prevPage, setPrevPage] = useState('home');
+  const [transitioning, setTransitioning] = useState(false);
   const [isDesktop, setDesktop] = useState(window.innerWidth >= 768);
 
   const colors = makeColors(theme);
@@ -41,9 +43,11 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   }, []);
 
   const navigate = (p) => {
-    // Stop semua video stream sebelum pindah halaman
-    // supaya kamera tidak block navigasi di iOS
-    if (p !== 'scan') {
+    if (p === page) return;
+    
+    if (page === 'scan') {
+      // Dari scan: stop kamera dulu, baru pindah halaman
+      setTransitioning(true);
       try {
         const videos = document.querySelectorAll('video');
         videos.forEach(v => {
@@ -52,10 +56,21 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
             v.srcObject = null;
           }
         });
+        // Hapus reader element
+        const reader = document.getElementById('reader');
+        if (reader) reader.innerHTML = '';
       } catch (_) {}
+      
+      // Delay 200ms supaya iOS sempat release kamera sebelum render halaman baru
+      setTimeout(() => {
+        setPage(p);
+        setTransitioning(false);
+        window.scrollTo(0, 0);
+      }, 200);
+    } else {
+      setPage(p);
+      window.scrollTo(0, 0);
     }
-    setPage(p);
-    window.scrollTo(0, 0);
   };
 
   const contentPad = () => {
@@ -109,7 +124,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
           {page === 'home' && (
             <HomePage user={user} isDesktop={isDesktop} onNavigate={navigate} theme={theme} />
           )}
-          {page === 'scan' && (
+          {page === 'scan' && !transitioning && (
             <ScannerCamera user={user} active={page === 'scan'} colors={colors} isDesktop={isDesktop} theme={theme} />
           )}
           {page === 'produk' && (
