@@ -21,6 +21,7 @@ const STATUS_MAP = {
   'DUPLICATE!': { label: 'Duplicate!', color: '#F59E0B', icon: 'AlertTriangle', bg: 'rgba(245,158,11,0.08)'  },
   'ERROR!':     { label: 'Error',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.08)'   },
   'GAGAL!':     { label: 'Gagal',      color: '#EF4444', icon: 'XCircle',       bg: 'rgba(239,68,68,0.08)'   },
+  'QUEUED':     { label: 'Tersimpan lokal', color: '#F59E0B', icon: 'Clock',     bg: 'rgba(245,158,11,0.08)'  },
 };
 const getCfg = (s) => STATUS_MAP[s] ?? { label: s, color: '#EF4444', icon: 'AlertCircle', bg: 'rgba(239,68,68,0.08)' };
 
@@ -33,19 +34,25 @@ const ScannerCamera = ({ user, active, colors, isDesktop, theme }) => {
   const manualRef = useRef(null);
   const isLight = theme === 'light';
 
-  const { status, lastScan, scanHistory, cameraError, sendScanData } =
+  const { status, lastScan, scanHistory, cameraError, sendScanData, online, pendingCount, syncQueue } =
     useScanner({ user, cam, active, mode });
 
   useEffect(() => { if (cam) localStorage.setItem('hoop_cam', cam); }, [cam]);
   useEffect(() => {
-    if (mode === 'manual' && manualRef.current) setTimeout(() => manualRef.current?.focus(), 200);
+    if (mode === 'manual') {
+      // autofocus lebih cepat
+      const t = setTimeout(() => manualRef.current?.focus(), 50);
+      return () => clearTimeout(t);
+    }
   }, [mode]);
 
   const handleManualSubmit = () => {
     if (!manualInput.trim()) return;
     sendScanData(manualInput.trim());
     setManualInput('');
-    if (manualRef.current) manualRef.current.focus();
+    // autofocus on mount
+    const tf = setTimeout(() => manualRef.current?.focus(), 50);
+    return () => clearTimeout(tf);
   };
 
   if (!cam) return <CamPicker colors={colors} onSelect={setCam} isLight={isLight} theme={theme} />;
@@ -58,7 +65,7 @@ const ScannerCamera = ({ user, active, colors, isDesktop, theme }) => {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
         <div>
-          <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} isLight={isLight} theme={theme} />
+          <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} isLight={isLight} theme={theme} online={online} pendingCount={pendingCount} syncQueue={syncQueue} />
           {mode === 'camera'
             ? <CameraBox cameraError={cameraError} colors={colors} isLight={isLight} theme={theme} />
             : <ManualBox value={manualInput} onChange={setManualInput} onKey={(e) => e.key === 'Enter' && handleManualSubmit()} onSubmit={handleManualSubmit} inputRef={manualRef} colors={colors} busy={busy} isLight={isLight} theme={theme} />
@@ -74,7 +81,7 @@ const ScannerCamera = ({ user, active, colors, isDesktop, theme }) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '480px', margin: '0 auto' }}>
-      <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} isLight={isLight} theme={theme} />
+      <ControlBar cam={cam} setCam={setCam} mode={mode} setMode={setMode} colors={colors} isLight={isLight} theme={theme} online={online} pendingCount={pendingCount} syncQueue={syncQueue} />
       <StatusBanner cfg={cfg} Icon={Icon} lastScan={lastScan} compact isLight={isLight} theme={theme} />
       {mode === 'camera'
         ? <CameraBox cameraError={cameraError} colors={colors} compact isLight={isLight} theme={theme} />
@@ -85,7 +92,33 @@ const ScannerCamera = ({ user, active, colors, isDesktop, theme }) => {
   );
 };
 
-const ControlBar = ({ cam, setCam, mode, setMode, colors, isLight, theme }) => {
+const NetworkBadge = ({ online, pendingCount, syncQueue, colors, isLight }) => (
+  <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+    <div style={{ display:'flex', alignItems:'center', gap:'5px', padding:'4px 10px', borderRadius:'20px',
+      background: online ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+      border: `1px solid ${online ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+    }}>
+      <div style={{ width:'6px', height:'6px', borderRadius:'50%',
+        background: online ? '#22C55E' : '#EF4444',
+        boxShadow: `0 0 6px ${online ? '#22C55E' : '#EF4444'}`,
+      }} />
+      <span style={{ fontSize:'10px', fontWeight:'700', color: online ? '#22C55E' : '#EF4444', letterSpacing:'0.06em' }}>
+        {online ? 'ONLINE' : 'OFFLINE'}
+      </span>
+    </div>
+    {pendingCount > 0 && (
+      <button onClick={syncQueue} style={{
+        display:'flex', alignItems:'center', gap:'4px', padding:'4px 10px', borderRadius:'20px',
+        background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.25)',
+        cursor:'pointer', fontFamily:'inherit',
+      }}>
+        <span style={{ fontSize:'10px', fontWeight:'700', color:'#F59E0B' }}>⏳ {pendingCount} pending</span>
+      </button>
+    )}
+  </div>
+);
+
+const ControlBar = ({ cam, setCam, mode, setMode, colors, isLight, theme, online, pendingCount, syncQueue }) => {
   const card = glassCard(theme);
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', gap: '8px' }}>
@@ -136,6 +169,7 @@ const ControlBar = ({ cam, setCam, mode, setMode, colors, isLight, theme }) => {
         })}
       </div>
     </div>
+    <NetworkBadge online={online} pendingCount={pendingCount} syncQueue={syncQueue} colors={colors} isLight={isLight} />
   );
 };
 
@@ -202,7 +236,7 @@ const ManualBox = ({ value, onChange, onKey, onSubmit, inputRef, colors, busy, c
     justifyContent: 'center', padding: '20px 16px', gap: '12px',
   }}>
     <p style={{ margin: 0, fontSize: TYPE.sm, color: colors.subText, textAlign: 'center' }}>
-      Scan barcode dengan alat scanner atau ketik manual, lalu <strong style={{ color: colors.text }}>Enter</strong>.
+      Scan barcode dengan alat scanner — otomatis terkirim.
     </p>
     <div style={{ width: '100%', display: 'flex', gap: '8px' }}>
       <input
@@ -221,6 +255,7 @@ const ManualBox = ({ value, onChange, onKey, onSubmit, inputRef, colors, busy, c
           boxShadow: isLight ? 'inset 0 1px 0 rgba(255,255,255,0.8)' : 'none',
         }}
         autoComplete="off"
+        autoFocus
       />
       <button onClick={onSubmit} disabled={busy || !value.trim()} style={{
         height: '44px', padding: '0 14px',
