@@ -127,7 +127,8 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
 
   useEffect(() => {
     fetchHome();
-    pollRef.current = setInterval(() => fetchHome(true), 15000);
+    // FIX: Polling dari 15 detik → 60 detik — kurangi beban ke backend (Google Apps Script ada rate limit)
+    pollRef.current = setInterval(() => fetchHome(true), 60000);
     return () => clearInterval(pollRef.current);
   }, [fetchHome]);
 
@@ -195,7 +196,6 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
     return (
       <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* "Good Morning, Name." style */}
           <div style={{ fontSize: isDesktop ? '22px' : '18px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: '5px' }}>
             {timeLabel},{' '}
             <span style={{ color: '#60A5FA', textShadow: isLight ? 'none' : '0 0 16px rgba(96,165,250,0.5)' }}>
@@ -203,7 +203,6 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
             </span>
             <span style={{ color: '#60A5FA', marginLeft: '2px' }}>.</span>
           </div>
-          {/* Motivasi subtitle */}
           <div style={{
             fontSize: isDesktop ? '13px' : '12px', fontWeight: '500',
             color: isLight ? 'rgba(30,60,120,0.5)' : 'rgba(148,185,230,0.5)',
@@ -230,10 +229,6 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
     );
   };
 
-  const Divider = () => (
-    <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(59,130,196,0.15),transparent)', margin: '20px 20px 0' }} />
-  );
-
   const KpiSection = () => (
     <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
       <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.3)' : 'rgba(148,185,230,0.22)', marginBottom: '12px' }}>
@@ -254,9 +249,7 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
               ? `0 8px 24px rgba(100,140,220,0.1), 0 0 20px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(255,255,255,0.95)`
               : `0 0 28px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(${k.rgb},0.08)`,
           }}>
-            {/* Corner glow */}
             <div style={{ position: 'absolute', width: '80px', height: '80px', borderRadius: '50%', background: `radial-gradient(circle,rgba(${k.rgb},0.2) 0%,transparent 70%)`, top: '-20px', right: '-20px', pointerEvents: 'none' }} />
-            {/* Top accent line */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1.5px', background: `linear-gradient(90deg,rgba(${k.rgb},0.9),rgba(${k.rgb},0))`, borderRadius: '20px 20px 0 0' }} />
 
             <div style={{ fontSize: '9px', color: isLight ? 'rgba(30,60,120,0.4)' : 'rgba(148,185,230,0.35)', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '7px' }}>

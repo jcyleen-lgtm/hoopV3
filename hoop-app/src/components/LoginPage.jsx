@@ -22,7 +22,6 @@ const LoginPage = ({ onLogin, isLoading }) => {
   const [password, setPassword] = useState('');
   const [phase, setPhase]       = useState('welcome');
   const [showWelcome]           = useState(() => isNewDay());
-  const [authStep, setAuthStep] = useState(0);
   const canvasRef = useRef(null);
   const rafRef    = useRef(null);
 
@@ -83,18 +82,17 @@ const LoginPage = ({ onLogin, isLoading }) => {
     return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(rafRef.current); };
   }, []);
 
+  // FIX: Welcome delay dikurangi dari 2000ms → 800ms, fallback dari 600ms → 0ms
   useEffect(() => {
     if (phase !== 'welcome') return;
-    const t = setTimeout(() => setPhase('login'), showWelcome ? 2000 : 600);
+    const t = setTimeout(() => setPhase('login'), showWelcome ? 800 : 0);
     return () => clearTimeout(t);
   }, [phase, showWelcome]);
 
-  const AUTH = ['AUTHENTICATING...', 'VERIFYING CREDENTIALS...', 'ACCESS GRANTED', 'LOADING WORKSPACE...'];
+  // FIX: Hapus artificial auth animation delay — langsung panggil onLogin
   const handleSubmit = () => {
     if (!username.trim() || !password.trim() || isLoading) return;
-    setPhase('auth'); setAuthStep(0);
-    AUTH.forEach((_, i) => setTimeout(() => setAuthStep(i + 1), i * 520));
-    setTimeout(() => onLogin(username.trim(), password.trim()), AUTH.length * 520 + 200);
+    onLogin(username.trim(), password.trim());
   };
 
   return (
@@ -110,7 +108,6 @@ const LoginPage = ({ onLogin, isLoading }) => {
         @keyframes logoPulse{0%,100%{box-shadow:0 0 22px rgba(56,189,248,0.28),0 0 44px rgba(56,189,248,0.1)}50%{box-shadow:0 0 40px rgba(56,189,248,0.5),0 0 80px rgba(56,189,248,0.2)}}
         @keyframes cardGlow {0%,100%{box-shadow:0 0 40px rgba(56,189,248,0.07),0 32px 64px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.08)}50%{box-shadow:0 0 70px rgba(56,189,248,0.16),0 32px 64px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.12)}}
         @keyframes dotPulse {0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
-        @keyframes authFade {from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
         .hi{width:100%;height:50px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:11px;padding:0 16px 0 44px;color:#fff;font-size:14px;font-weight:400;outline:none;transition:all 0.2s;backdrop-filter:blur(8px);font-family:'Inter',sans-serif;}
         .hi::placeholder{color:rgba(255,255,255,0.28);}
         .hi:focus{border-color:rgba(56,189,248,0.45);background:rgba(56,189,248,0.05);box-shadow:0 0 0 3px rgba(56,189,248,0.07);}
@@ -177,30 +174,22 @@ const LoginPage = ({ onLogin, isLoading }) => {
                 </div>
                 <input className="hi" type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSubmit()} disabled={isLoading} />
               </div>
-              <button className="hb" onClick={handleSubmit} disabled={isLoading || !username.trim() || !password.trim()}>Masuk →</button>
+
+              {/* FIX: Button sekarang menampilkan loading spinner dari isLoading prop (dari App.jsx) */}
+              <button className="hb" onClick={handleSubmit} disabled={isLoading || !username.trim() || !password.trim()}>
+                {isLoading ? (
+                  <span style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:'8px' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                      style={{ animation:'spin 0.8s linear infinite' }}>
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                    </svg>
+                    Masuk...
+                  </span>
+                ) : 'Masuk →'}
+              </button>
             </div>
           </div>
           <p style={{ marginTop:'16px', fontSize:'11px', color:'rgba(255,255,255,0.14)', letterSpacing:'0.05em' }}>Hoop © {new Date().getFullYear()} · Warehouse Intelligence</p>
-        </div>
-      )}
-
-      {/* ── AUTH ── */}
-      {phase === 'auth' && (
-        <div style={{ position:'relative', zIndex:10, minHeight:'100dvh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'24px', animation:'fadeIn 0.3s ease' }}>
-          <div style={{ position:'relative', width:'90px', height:'90px' }}>
-            <div style={{ position:'absolute', inset:0, borderRadius:'50%', border:'1.5px solid rgba(56,189,248,0.12)' }} />
-            <div style={{ position:'absolute', inset:0, borderRadius:'50%', border:'1.5px solid transparent', borderTopColor:'#38BDF8', animation:'spin 0.9s linear infinite', boxShadow:'0 0 14px rgba(56,189,248,0.4)' }} />
-            <div style={{ position:'absolute', inset:'10px', borderRadius:'50%', border:'1px solid transparent', borderBottomColor:'rgba(56,189,248,0.5)', animation:'spin 1.3s linear infinite reverse' }} />
-            <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}><HoopLogo /></div>
-          </div>
-          <div style={{ textAlign:'center' }}>
-            {AUTH.slice(0, authStep).map((line, i) => (
-              <div key={i} style={{ fontSize:'12px', fontWeight:'600', letterSpacing:'0.1em', color: i === authStep-1 ? '#38BDF8' : 'rgba(56,189,248,0.28)', marginBottom:'5px', animation:'authFade 0.3s ease', textShadow: i === authStep-1 ? '0 0 10px rgba(56,189,248,0.5)' : 'none' }}>
-                {i === authStep-1 && <span style={{ marginRight:'6px', animation:'blink 0.6s step-end infinite' }}>▶</span>}
-                {line}
-              </div>
-            ))}
-          </div>
         </div>
       )}
     </div>

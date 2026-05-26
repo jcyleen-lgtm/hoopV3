@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Import Internal
 import { makeColors, NAVY, FONT, RADIUS, TYPE } from './theme';
@@ -27,12 +27,13 @@ const SunIcon = () => (
 );
 
 // Props: user, onLogout, theme, toggleTheme — all from App.jsx
-// Scanner no longer manages its own auth state.
 const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   const [page, setPage]         = useState('home');
-  const [prevPage, setPrevPage] = useState('home');
   const [transitioning, setTransitioning] = useState(false);
   const [isDesktop, setDesktop] = useState(window.innerWidth >= 768);
+
+  // FIX: Gunakan ref untuk target navigasi supaya tidak ada race condition
+  const pendingNav = useRef(null);
 
   const colors = makeColors(theme);
 
@@ -43,11 +44,14 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
   }, []);
 
   const navigate = (p) => {
-    if (p === page) return;
-    
+    // FIX: Guard double-click dan navigasi saat sedang transitioning
+    if (p === page || transitioning) return;
+
     if (page === 'scan') {
       // Dari scan: stop kamera dulu, baru pindah halaman
+      pendingNav.current = p;
       setTransitioning(true);
+
       try {
         const videos = document.querySelectorAll('video');
         videos.forEach(v => {
@@ -60,13 +64,15 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
         const reader = document.getElementById('reader');
         if (reader) reader.innerHTML = '';
       } catch (_) {}
-      
-      // Delay 200ms supaya iOS sempat release kamera sebelum render halaman baru
+
+      // FIX: Naikkan delay dari 200ms ke 500ms — kasih waktu kamera release di iOS & HP budget
       setTimeout(() => {
-        setPage(p);
+        const target = pendingNav.current;
+        pendingNav.current = null;
+        setPage(target);
         setTransitioning(false);
         window.scrollTo(0, 0);
-      }, 200);
+      }, 500);
     } else {
       setPage(p);
       window.scrollTo(0, 0);
@@ -101,7 +107,6 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
         marginLeft: isDesktop ? SIDEBAR_WIDTH : 0,
         height: '100vh',
         overflowY: 'auto',
-        
         display: 'flex',
         flexDirection: 'column',
         transition: 'margin-left .25s ease',
@@ -124,8 +129,19 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
           {page === 'home' && (
             <HomePage user={user} isDesktop={isDesktop} onNavigate={navigate} theme={theme} />
           )}
+          {/* FIX: Render ScannerCamera hanya kalau tidak sedang transitioning */}
           {page === 'scan' && !transitioning && (
             <ScannerCamera user={user} active={page === 'scan'} colors={colors} isDesktop={isDesktop} theme={theme} />
+          )}
+          {/* FIX: Tampilkan loading indicator saat keluar dari scanner */}
+          {page === 'scan' && transitioning && (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100%', flexDirection:'column', gap:'16px' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={colors.accent || '#3B82C4'} strokeWidth="2" strokeLinecap="round"
+                style={{ animation:'spin 0.8s linear infinite' }}>
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+              </svg>
+              <span style={{ fontSize:'13px', color: colors.textMuted || 'rgba(255,255,255,0.4)' }}>Melepas kamera...</span>
+            </div>
           )}
           {page === 'produk' && (
             <ProductList colors={colors} isDesktop={isDesktop} />
