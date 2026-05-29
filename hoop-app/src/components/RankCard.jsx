@@ -1,4 +1,4 @@
-import React, { memo, memo } from 'react';
+import React, { memo } from 'react';
 import { TYPE, RADIUS, glassCard } from '../theme';
 
 const RankCard = ({ rows, colors, rankStyle, barColor, theme }) => {

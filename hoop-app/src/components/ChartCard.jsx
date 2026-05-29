@@ -1,4 +1,3 @@
-import React, { memo, memo } from 'react'; // FIX: removed duplicate
 import React, { useState, memo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from 'recharts';
 import { TYPE, RADIUS, glassCard } from '../theme';
