@@ -1,6 +1,6 @@
 {
-  "name": "Hoop - Warehouse Intelligence",
-  "short_name": "Hoop",
+  "name": "Packer - Warehouse Intelligence",
+  "short_name": "Packer",
   "description": "Warehouse Packing System",
   "start_url": "/",
   "display": "standalone",

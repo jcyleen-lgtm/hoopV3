@@ -182,7 +182,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
 };
 
 // ── Hoop Logo (same as sidebar) ────────────────────────────────────────────────
-const HoopLogoSVG = () => (
+const PackerLogo = () => (
   <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
     <rect x="4" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
     <rect x="15" y="8" width="6" height="20" rx="3" fill="white" opacity="0.9"/>
@@ -215,9 +215,9 @@ const TopBar = ({ isDesktop, user, theme, colors, onToggleTheme, MoonIcon, SunIc
         boxShadow: '0 0 14px rgba(59,130,196,0.35), inset 0 1px 0 rgba(255,255,255,0.1)',
         border: '1px solid rgba(96,165,250,0.2)',
       }}>
-        <HoopLogoSVG />
+        <PackerLogo />
       </div>
-      <span style={{ fontSize: TYPE.md, fontWeight: '700', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '0.12em', fontFamily: "'Inter', system-ui, sans-serif" }}>Hoop</span>
+      <span style={{ fontSize: TYPE.md, fontWeight: '700', color: theme === 'light' ? '#0D1F40' : '#fff', letterSpacing: '0.12em', fontFamily: "'Inter', system-ui, sans-serif" }}>Packer</span>
     </div>
 
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
