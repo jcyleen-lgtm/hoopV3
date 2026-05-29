@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { callScript } from '../api';
 import { NAVY, FONT, RADIUS, TYPE, glassCard } from '../theme';
 
@@ -28,7 +28,7 @@ const rankStyle = (i) => {
 };
 
 // ── Animated counter ───────────────────────────────────────────
-const AnimCounter = ({ target, duration = 800 }) => {
+const AnimCounter = memo(({ target, duration = 800 }) => {
   const [val, setVal] = useState(0);
   const prev = useRef(0);
   useEffect(() => {
@@ -45,10 +45,10 @@ const AnimCounter = ({ target, duration = 800 }) => {
     requestAnimationFrame(tick);
   }, [target, duration]);
   return <>{val.toLocaleString('id-ID')}</>;
-};
+});
 
 // ── Mini sparkline bars ────────────────────────────────────────
-const SparkBars = ({ color, glowColor }) => {
+const SparkBars = memo(({ color, glowColor }) => {
   const heights = [35, 52, 44, 68, 58, 78, 100];
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '22px', marginTop: '10px' }}>
@@ -61,10 +61,10 @@ const SparkBars = ({ color, glowColor }) => {
       ))}
     </div>
   );
-};
+});
 
 // ── Staff dot grid ─────────────────────────────────────────────
-const StaffDots = ({ count, total = 15 }) => (
+const StaffDots = memo(({ count, total = 15 }) => (
   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '10px' }}>
     {Array.from({ length: total }).map((_, i) => (
       <div key={i} style={{
@@ -74,7 +74,7 @@ const StaffDots = ({ count, total = 15 }) => (
       }} />
     ))}
   </div>
-);
+));
 
 // ── Feed time format ───────────────────────────────────────────
 const timeAgo = (isoStr) => {
@@ -93,6 +93,207 @@ const DesktopGrid = ({ children }) => (
     {children}
   </div>
 );
+
+// ── FIX: Sub-komponen dipindah ke LUAR HomePage agar tidak di-recreate tiap render ──
+
+const Greeting = memo(({ user, isDesktop, isLight, staffCount }) => {
+  const hour = new Date().getHours();
+  const timeLabel = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 20 ? 'Good evening' : 'Good night';
+  const motivasi = hour < 5
+    ? "Still grinding? You're a legend — rest when you can."
+    : hour < 9
+    ? "New day, new target. Let's go!"
+    : hour < 12
+    ? 'Morning energy. Stay sharp and keep pushing.'
+    : hour < 14
+    ? 'Midday focus. Finish strong.'
+    : hour < 17
+    ? "Afternoon grind. You've got this."
+    : hour < 20
+    ? "Closing shift — give it everything you've got."
+    : 'Overtime mode ON. The best teams never quit.';
+
+  return (
+    <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: isDesktop ? '22px' : '18px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: '5px' }}>
+          {timeLabel},{' '}
+          <span style={{ color: '#60A5FA', textShadow: isLight ? 'none' : '0 0 16px rgba(96,165,250,0.5)' }}>
+            {user?.name || 'Admin'}
+          </span>
+          <span style={{ color: '#60A5FA', marginLeft: '2px' }}>.</span>
+        </div>
+        <div style={{
+          fontSize: isDesktop ? '13px' : '12px', fontWeight: '500',
+          color: isLight ? 'rgba(30,60,120,0.5)' : 'rgba(148,185,230,0.5)',
+          lineHeight: 1.4, marginBottom: '10px',
+          maxWidth: isDesktop ? '360px' : '240px',
+        }}>
+          {motivasi}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLight ? '#16A34A' : '#22C55E', boxShadow: isLight ? '0 0 10px rgba(22,163,74,0.8)' : '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)', flexShrink: 0 }} />
+          <span style={{ fontSize: '11px', color: isLight ? 'rgba(30,60,120,0.45)' : 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0, marginLeft: '12px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: '20px', padding: '4px 10px', boxShadow: '0 0 14px rgba(239,68,68,0.12)' }}>
+          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
+          <span style={{ fontSize: '10px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>LIVE</span>
+        </div>
+        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#1E3A6E,#3B82C4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', border: '1.5px solid rgba(59,130,196,0.35)', boxShadow: '0 0 16px rgba(59,130,196,0.3)' }}>
+          {(user?.name || 'AD').slice(0, 2).toUpperCase()}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+const KpiSection = memo(({ isDesktop, isLight, loading, kpis }) => (
+  <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
+    <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.3)' : 'rgba(148,185,230,0.22)', marginBottom: '12px' }}>
+      Operasional Hari Ini
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+      {kpis.map((k, i) => (
+        <div key={i} style={{
+          background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.95)',
+          backdropFilter: isLight ? 'blur(20px)' : 'none',
+          WebkitBackdropFilter: isLight ? 'blur(20px)' : 'none',
+          border: `1px solid rgba(${k.rgb},${isLight ? '0.22' : '0.15'})`,
+          borderRadius: '20px',
+          padding: '16px 15px 14px',
+          position: 'relative',
+          overflow: 'hidden',
+          boxShadow: isLight
+            ? `0 8px 24px rgba(100,140,220,0.1), 0 0 20px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(255,255,255,0.95)`
+            : `0 0 28px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(${k.rgb},0.08)`,
+        }}>
+          <div style={{ position: 'absolute', width: '80px', height: '80px', borderRadius: '50%', background: `radial-gradient(circle,rgba(${k.rgb},0.2) 0%,transparent 70%)`, top: '-20px', right: '-20px', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1.5px', background: `linear-gradient(90deg,rgba(${k.rgb},0.9),rgba(${k.rgb},0))`, borderRadius: '20px 20px 0 0' }} />
+
+          <div style={{ fontSize: '9px', color: isLight ? 'rgba(30,60,120,0.4)' : 'rgba(148,185,230,0.35)', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '7px' }}>
+            {k.label}
+          </div>
+
+          {k.nameVal != null ? (
+            <>
+              <div style={{ fontSize: '20px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.5px', lineHeight: 1, marginTop: '4px' }}>{loading ? '—' : k.nameVal}</div>
+              <div style={{ fontSize: '11px', color: `rgba(${k.rgb},0.7)`, marginTop: '5px', fontWeight: '600' }}>{k.subVal}</div>
+              <div style={{ fontSize: '10px', color: 'rgba(148,185,230,0.2)', marginTop: '3px' }}>🥇 #1 ranking</div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: '30px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-1.5px', lineHeight: 1 }}>
+                {loading ? '—' : <AnimCounter target={k.value} />}
+                <span style={{ fontSize: '12px', fontWeight: '400', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginLeft: '3px' }}>{k.unit}</span>
+              </div>
+              {k.extra}
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+));
+
+const StaffSection = memo(({ isDesktop, isLight, loading, rows, onNavigate }) => (
+  <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+      <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(148,185,230,0.22)' }}>
+        Staff Performance
+      </div>
+      <span onClick={() => onNavigate('dashboard')} style={{ fontSize: '11px', color: isLight ? 'rgba(59,130,196,0.8)' : 'rgba(59,130,196,0.6)', fontWeight: '600', cursor: 'pointer' }}>
+        Lihat semua →
+      </span>
+    </div>
+    <div style={{ display: 'flex', gap: '10px', overflowX: isDesktop ? 'visible' : 'auto', flexWrap: isDesktop ? 'wrap' : 'nowrap', paddingBottom: isDesktop ? '0' : '6px' }}>
+      {loading ? (
+        [1,2,3,4].map(i => (
+          <div key={i} style={{ minWidth: '110px', height: '120px', background: 'rgba(8,18,32,0.8)', border: '1px solid rgba(59,130,196,0.08)', borderRadius: '18px', flexShrink: 0 }} />
+        ))
+      ) : rows.slice(0, isDesktop ? 8 : 5).map((r, i) => {
+        const rs = rankStyle(i);
+        const [c1, c2] = avatarColor(r.nama);
+        const pct = rows[0]?.total > 0 ? Math.round((r.total / rows[0].total) * 100) : 0;
+        return (
+          <div key={i} style={{
+            minWidth: isDesktop ? '0' : '110px',
+            flex: isDesktop ? '1 1 140px' : '0 0 auto',
+            background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.95)',
+            backdropFilter: isLight ? 'blur(16px)' : 'none',
+            WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none',
+            border: rs.border,
+            borderRadius: '18px',
+            padding: '14px 12px',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: isLight ? `0 6px 20px rgba(100,140,220,0.1), 0 0 16px ${rs.glow}, inset 0 1px 0 rgba(255,255,255,0.95)` : `0 0 20px ${rs.glow}, inset 0 1px 0 ${rs.glow}`,
+            flexShrink: 0,
+          }}>
+            <div style={{ position: 'absolute', width: '60px', height: '60px', borderRadius: '50%', background: `radial-gradient(circle,${rs.glow} 0%,transparent 70%)`, top: '-15px', right: '-15px', pointerEvents: 'none' }} />
+            <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: `linear-gradient(135deg,${c1},${c2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', color: '#fff', marginBottom: '9px', position: 'relative' }}>
+              {r.nama.slice(0,2)}
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: '9px', height: '9px', borderRadius: '50%', background: '#22C55E', border: '2px solid #040810', boxShadow: '0 0 8px #22C55E' }} />
+            </div>
+            <div style={{ fontSize: '11px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.nama}</div>
+            <div style={{ fontSize: '20px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>
+              {r.total.toLocaleString('id-ID')}<span style={{ fontSize: '9px', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginLeft: '2px' }}>pcs</span>
+            </div>
+            <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: rs.line, borderRadius: '2px', boxShadow: `0 0 8px ${rs.lineGlow}` }} />
+            </div>
+            <div style={{ fontSize: '9px', marginTop: '5px', fontWeight: '700', color: i === 0 ? '#D4AF37' : 'rgba(148,185,230,0.35)' }}>
+              {i === 0 ? '🥇 Top' : i === 1 ? '🥈 #2' : i === 2 ? '🥉 #3' : `#${i+1}`}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+));
+
+const FeedSection = memo(({ isDesktop, isLight, loading, activity }) => (
+  <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+      <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(148,185,230,0.22)' }}>
+        Live Activity
+      </div>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '3px 8px', boxShadow: '0 0 10px rgba(239,68,68,0.1)' }}>
+        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
+        <span style={{ fontSize: '9px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>REALTIME</span>
+      </div>
+    </div>
+
+    <div style={{ background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.8)', backdropFilter: isLight ? 'blur(16px)' : 'none', WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none', border: isLight ? '1px solid rgba(255,255,255,0.75)' : '1px solid rgba(59,130,196,0.08)', borderRadius: '16px', overflow: 'hidden', boxShadow: isLight ? '0 6px 20px rgba(100,140,220,0.08), inset 0 1px 0 rgba(255,255,255,0.95)' : 'none' }}>
+      {loading ? (
+        [1,2,3].map(i => (
+          <div key={i} style={{ height: '52px', borderBottom: '1px solid rgba(255,255,255,0.03)', margin: '0 16px' }} />
+        ))
+      ) : activity.length === 0 ? (
+        <div style={{ padding: '24px 16px', textAlign: 'center', fontSize: '12px', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)' }}>
+          Belum ada aktivitas hari ini
+        </div>
+      ) : activity.map((item, i) => {
+        const dotColor = FEED_COLORS[i % FEED_COLORS.length];
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '11px 16px', borderBottom: i < activity.length - 1 ? '1px solid rgba(255,255,255,0.035)' : 'none' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor, boxShadow: `0 0 8px ${dotColor}`, flexShrink: 0, marginTop: '5px' }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '12px', color: isLight ? 'rgba(30,60,120,0.6)' : 'rgba(148,185,230,0.65)', lineHeight: 1.5 }}>
+                <span style={{ color: isLight ? '#0D1F40' : '#E8F4FF', fontWeight: '600' }}>{item.nama}</span>
+                {' · '}{item.cam}
+                {' · scan '}
+                <span style={{ color: isLight ? '#0D1F40' : '#E8F4FF', fontWeight: '600', fontFamily: 'monospace', fontSize: '11px' }}>{item.id}</span>
+              </div>
+              <div style={{ fontSize: '10px', color: isLight ? 'rgba(30,60,120,0.3)' : 'rgba(148,185,230,0.2)', marginTop: '2px' }}>{timeAgo(item.time)}</div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+));
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -127,7 +328,7 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
 
   useEffect(() => {
     fetchHome();
-    // FIX: Polling dari 15 detik → 60 detik — kurangi beban ke backend (Google Apps Script ada rate limit)
+    // Polling 60 detik — kurangi beban ke backend
     pollRef.current = setInterval(() => fetchHome(true), 60000);
     return () => clearInterval(pollRef.current);
   }, [fetchHome]);
@@ -175,206 +376,6 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
     },
   ];
 
-  // ── Render ────────────────────────────────────────────────────
-  const Greeting = () => {
-    const hour = new Date().getHours();
-    const timeLabel = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 20 ? 'Good evening' : 'Good night';
-    const motivasi = hour < 5
-      ? "Still grinding? You're a legend — rest when you can."
-      : hour < 9
-      ? "New day, new target. Let's go!"
-      : hour < 12
-      ? 'Morning energy. Stay sharp and keep pushing.'
-      : hour < 14
-      ? 'Midday focus. Finish strong.'
-      : hour < 17
-      ? "Afternoon grind. You've got this."
-      : hour < 20
-      ? "Closing shift — give it everything you've got."
-      : 'Overtime mode ON. The best teams never quit.';
-
-    return (
-      <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: isDesktop ? '22px' : '18px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: '5px' }}>
-            {timeLabel},{' '}
-            <span style={{ color: '#60A5FA', textShadow: isLight ? 'none' : '0 0 16px rgba(96,165,250,0.5)' }}>
-              {user?.name || 'Admin'}
-            </span>
-            <span style={{ color: '#60A5FA', marginLeft: '2px' }}>.</span>
-          </div>
-          <div style={{
-            fontSize: isDesktop ? '13px' : '12px', fontWeight: '500',
-            color: isLight ? 'rgba(30,60,120,0.5)' : 'rgba(148,185,230,0.5)',
-            lineHeight: 1.4, marginBottom: '10px',
-            maxWidth: isDesktop ? '360px' : '240px',
-          }}>
-            {motivasi}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLight ? '#16A34A' : '#22C55E', boxShadow: isLight ? '0 0 10px rgba(22,163,74,0.8)' : '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)', flexShrink: 0 }} />
-            <span style={{ fontSize: '11px', color: isLight ? 'rgba(30,60,120,0.45)' : 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
-          </div>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0, marginLeft: '12px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: '20px', padding: '4px 10px', boxShadow: '0 0 14px rgba(239,68,68,0.12)' }}>
-            <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
-            <span style={{ fontSize: '10px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>LIVE</span>
-          </div>
-          <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#1E3A6E,#3B82C4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', border: '1.5px solid rgba(59,130,196,0.35)', boxShadow: '0 0 16px rgba(59,130,196,0.3)' }}>
-            {(user?.name || 'AD').slice(0, 2).toUpperCase()}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const KpiSection = () => (
-    <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
-      <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: isLight ? 'rgba(30,60,120,0.3)' : 'rgba(148,185,230,0.22)', marginBottom: '12px' }}>
-        Operasional Hari Ini
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-        {kpis.map((k, i) => (
-          <div key={i} style={{
-            background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.95)',
-            backdropFilter: isLight ? 'blur(20px)' : 'none',
-            WebkitBackdropFilter: isLight ? 'blur(20px)' : 'none',
-            border: `1px solid rgba(${k.rgb},${isLight ? '0.22' : '0.15'})`,
-            borderRadius: '20px',
-            padding: '16px 15px 14px',
-            position: 'relative',
-            overflow: 'hidden',
-            boxShadow: isLight
-              ? `0 8px 24px rgba(100,140,220,0.1), 0 0 20px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(255,255,255,0.95)`
-              : `0 0 28px rgba(${k.rgb},0.1), inset 0 1px 0 rgba(${k.rgb},0.08)`,
-          }}>
-            <div style={{ position: 'absolute', width: '80px', height: '80px', borderRadius: '50%', background: `radial-gradient(circle,rgba(${k.rgb},0.2) 0%,transparent 70%)`, top: '-20px', right: '-20px', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1.5px', background: `linear-gradient(90deg,rgba(${k.rgb},0.9),rgba(${k.rgb},0))`, borderRadius: '20px 20px 0 0' }} />
-
-            <div style={{ fontSize: '9px', color: isLight ? 'rgba(30,60,120,0.4)' : 'rgba(148,185,230,0.35)', fontWeight: '700', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '7px' }}>
-              {k.label}
-            </div>
-
-            {k.nameVal != null ? (
-              <>
-                <div style={{ fontSize: '20px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.5px', lineHeight: 1, marginTop: '4px' }}>{loading ? '—' : k.nameVal}</div>
-                <div style={{ fontSize: '11px', color: `rgba(${k.rgb},0.7)`, marginTop: '5px', fontWeight: '600' }}>{k.subVal}</div>
-                <div style={{ fontSize: '10px', color: 'rgba(148,185,230,0.2)', marginTop: '3px' }}>🥇 #1 ranking</div>
-              </>
-            ) : (
-              <>
-                <div style={{ fontSize: '30px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-1.5px', lineHeight: 1 }}>
-                  {loading ? '—' : <AnimCounter target={k.value} />}
-                  <span style={{ fontSize: '12px', fontWeight: '400', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginLeft: '3px' }}>{k.unit}</span>
-                </div>
-                {k.extra}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const StaffSection = () => (
-    <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-        <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(148,185,230,0.22)' }}>
-          Staff Performance
-        </div>
-        <span onClick={() => onNavigate('dashboard')} style={{ fontSize: '11px', color: isLight ? 'rgba(59,130,196,0.8)' : 'rgba(59,130,196,0.6)', fontWeight: '600', cursor: 'pointer' }}>
-          Lihat semua →
-        </span>
-      </div>
-      <div style={{ display: 'flex', gap: '10px', overflowX: isDesktop ? 'visible' : 'auto', flexWrap: isDesktop ? 'wrap' : 'nowrap', paddingBottom: isDesktop ? '0' : '6px' }}>
-        {loading ? (
-          [1,2,3,4].map(i => (
-            <div key={i} style={{ minWidth: '110px', height: '120px', background: 'rgba(8,18,32,0.8)', border: '1px solid rgba(59,130,196,0.08)', borderRadius: '18px', flexShrink: 0 }} />
-          ))
-        ) : rows.slice(0, isDesktop ? 8 : 5).map((r, i) => {
-          const rs = rankStyle(i);
-          const [c1, c2] = avatarColor(r.nama);
-          const pct = rows[0]?.total > 0 ? Math.round((r.total / rows[0].total) * 100) : 0;
-          return (
-            <div key={i} style={{
-              minWidth: isDesktop ? '0' : '110px',
-              flex: isDesktop ? '1 1 140px' : '0 0 auto',
-              background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.95)',
-              backdropFilter: isLight ? 'blur(16px)' : 'none',
-              WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none',
-              border: rs.border,
-              borderRadius: '18px',
-              padding: '14px 12px',
-              position: 'relative',
-              overflow: 'hidden',
-              boxShadow: isLight ? `0 6px 20px rgba(100,140,220,0.1), 0 0 16px ${rs.glow}, inset 0 1px 0 rgba(255,255,255,0.95)` : `0 0 20px ${rs.glow}, inset 0 1px 0 ${rs.glow}`,
-              flexShrink: 0,
-            }}>
-              <div style={{ position: 'absolute', width: '60px', height: '60px', borderRadius: '50%', background: `radial-gradient(circle,${rs.glow} 0%,transparent 70%)`, top: '-15px', right: '-15px', pointerEvents: 'none' }} />
-              <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: `linear-gradient(135deg,${c1},${c2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', color: '#fff', marginBottom: '9px', position: 'relative' }}>
-                {r.nama.slice(0,2)}
-                <div style={{ position: 'absolute', bottom: 0, right: 0, width: '9px', height: '9px', borderRadius: '50%', background: '#22C55E', border: '2px solid #040810', boxShadow: '0 0 8px #22C55E' }} />
-              </div>
-              <div style={{ fontSize: '11px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.nama}</div>
-              <div style={{ fontSize: '20px', fontWeight: '900', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>
-                {r.total.toLocaleString('id-ID')}<span style={{ fontSize: '9px', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)', marginLeft: '2px' }}>pcs</span>
-              </div>
-              <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${pct}%`, background: rs.line, borderRadius: '2px', boxShadow: `0 0 8px ${rs.lineGlow}` }} />
-              </div>
-              <div style={{ fontSize: '9px', marginTop: '5px', fontWeight: '700', color: i === 0 ? '#D4AF37' : 'rgba(148,185,230,0.35)' }}>
-                {i === 0 ? '🥇 Top' : i === 1 ? '🥈 #2' : i === 2 ? '🥉 #3' : `#${i+1}`}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const FeedSection = () => (
-    <div style={{ padding: isDesktop ? '22px 0 0' : '22px 16px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-        <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(148,185,230,0.22)' }}>
-          Live Activity
-        </div>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '20px', padding: '3px 8px', boxShadow: '0 0 10px rgba(239,68,68,0.1)' }}>
-          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
-          <span style={{ fontSize: '9px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>REALTIME</span>
-        </div>
-      </div>
-
-      <div style={{ background: isLight ? 'rgba(255,255,255,0.5)' : 'rgba(8,18,32,0.8)', backdropFilter: isLight ? 'blur(16px)' : 'none', WebkitBackdropFilter: isLight ? 'blur(16px)' : 'none', border: isLight ? '1px solid rgba(255,255,255,0.75)' : '1px solid rgba(59,130,196,0.08)', borderRadius: '16px', overflow: 'hidden', boxShadow: isLight ? '0 6px 20px rgba(100,140,220,0.08), inset 0 1px 0 rgba(255,255,255,0.95)' : 'none' }}>
-        {loading ? (
-          [1,2,3].map(i => (
-            <div key={i} style={{ height: '52px', borderBottom: '1px solid rgba(255,255,255,0.03)', margin: '0 16px' }} />
-          ))
-        ) : activity.length === 0 ? (
-          <div style={{ padding: '24px 16px', textAlign: 'center', fontSize: '12px', color: isLight ? 'rgba(30,60,120,0.35)' : 'rgba(148,185,230,0.3)' }}>
-            Belum ada aktivitas hari ini
-          </div>
-        ) : activity.map((item, i) => {
-          const dotColor = FEED_COLORS[i % FEED_COLORS.length];
-          return (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '11px 16px', borderBottom: i < activity.length - 1 ? '1px solid rgba(255,255,255,0.035)' : 'none' }}>
-              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: dotColor, boxShadow: `0 0 8px ${dotColor}`, flexShrink: 0, marginTop: '5px' }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '12px', color: isLight ? 'rgba(30,60,120,0.6)' : 'rgba(148,185,230,0.65)', lineHeight: 1.5 }}>
-                  <span style={{ color: isLight ? '#0D1F40' : '#E8F4FF', fontWeight: '600' }}>{item.nama}</span>
-                  {' · '}{item.cam}
-                  {' · scan '}
-                  <span style={{ color: isLight ? '#0D1F40' : '#E8F4FF', fontWeight: '600', fontFamily: 'monospace', fontSize: '11px' }}>{item.id}</span>
-                </div>
-                <div style={{ fontSize: '10px', color: isLight ? 'rgba(30,60,120,0.3)' : 'rgba(148,185,230,0.2)', marginTop: '2px' }}>{timeAgo(item.time)}</div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-
   return (
     <>
       <style>{`
@@ -389,26 +390,26 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
       </div>
 
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100%', paddingBottom: isDesktop ? '40px' : '100px' }}>
-        <Greeting />
+        <Greeting user={user} isDesktop={isDesktop} isLight={isLight} staffCount={staffCount} />
         <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(59,130,196,0.15),transparent)', margin: '20px 20px 0' }} />
 
         {isDesktop ? (
           <div style={{ padding: '0 36px' }}>
             <DesktopGrid>
               <div>
-                <KpiSection />
-                <StaffSection />
+                <KpiSection isDesktop={isDesktop} isLight={isLight} loading={loading} kpis={kpis} />
+                <StaffSection isDesktop={isDesktop} isLight={isLight} loading={loading} rows={rows} onNavigate={onNavigate} />
               </div>
               <div>
-                <FeedSection />
+                <FeedSection isDesktop={isDesktop} isLight={isLight} loading={loading} activity={activity} />
               </div>
             </DesktopGrid>
           </div>
         ) : (
           <>
-            <KpiSection />
-            <StaffSection />
-            <FeedSection />
+            <KpiSection isDesktop={isDesktop} isLight={isLight} loading={loading} kpis={kpis} />
+            <StaffSection isDesktop={isDesktop} isLight={isLight} loading={loading} rows={rows} onNavigate={onNavigate} />
+            <FeedSection isDesktop={isDesktop} isLight={isLight} loading={loading} activity={activity} />
           </>
         )}
       </div>

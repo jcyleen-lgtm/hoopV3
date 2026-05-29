@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, memo } from 'react';
 import { TYPE, RADIUS, glassCard } from '../theme';
 
 // Built-in inline icon shapes keyed by name
@@ -77,4 +77,4 @@ const KpiCard = ({ icon, label, value, unit, accent, colors, small, theme }) => 
   );
 };
 
-export default KpiCard;
+export default memo(KpiCard); // FIX: memo — skip re-render if props unchanged

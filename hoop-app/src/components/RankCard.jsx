@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, memo } from 'react';
 import { TYPE, RADIUS, glassCard } from '../theme';
 
 const RankCard = ({ rows, colors, rankStyle, barColor, theme }) => {
@@ -55,4 +55,4 @@ const RankCard = ({ rows, colors, rankStyle, barColor, theme }) => {
   );
 };
 
-export default RankCard;
+export default memo(RankCard); // FIX: memo — skip re-render if props unchanged

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 // Import Internal
 import { makeColors, NAVY, FONT, RADIUS, TYPE } from './theme';
@@ -34,13 +34,25 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
 
   // FIX: Gunakan ref untuk target navigasi supaya tidak ada race condition
   const pendingNav = useRef(null);
+  // FIX: Debounce ref untuk resize
+  const resizeTimer = useRef(null);
 
-  const colors = makeColors(theme);
+  // FIX: useMemo — colors hanya dibuat ulang saat theme berubah, bukan tiap render
+  const colors = useMemo(() => makeColors(theme), [theme]);
 
   useEffect(() => {
-    const handleResize = () => setDesktop(window.innerWidth >= 768);
+    // FIX: Debounce resize listener — cegah setState puluhan kali saat rotate/resize
+    const handleResize = () => {
+      clearTimeout(resizeTimer.current);
+      resizeTimer.current = setTimeout(() => {
+        setDesktop(window.innerWidth >= 768);
+      }, 100);
+    };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimer.current);
+    };
   }, []);
 
   const navigate = (p) => {
@@ -65,7 +77,7 @@ const Scanner = ({ user, onLogout, theme, toggleTheme }) => {
         if (reader) reader.innerHTML = '';
       } catch (_) {}
 
-      // FIX: Naikkan delay dari 200ms ke 500ms — kasih waktu kamera release di iOS & HP budget
+      // FIX: Delay 500ms — kasih waktu kamera release di iOS & HP budget
       setTimeout(() => {
         const target = pendingNav.current;
         pendingNav.current = null;
@@ -246,6 +258,11 @@ const GlobalStyles = ({ colors }) => (
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
       letter-spacing: 0.02em;
+    }
+    /* FIX: Hapus delay tap 300ms di semua button & link */
+    button, a, [role="button"] {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     @keyframes hpBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
     #reader video { border-radius: 14px !important; object-fit: cover; }

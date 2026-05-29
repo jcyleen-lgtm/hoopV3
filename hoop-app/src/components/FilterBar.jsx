@@ -51,7 +51,7 @@ const FilterBar = ({
         setShowMonthMenu(false);
       }
     };
-    document.addEventListener('mousedown', handler);
+    document.addEventListener('mousedown', handler, { passive: true }); // FIX: passive listener
     return () => document.removeEventListener('mousedown', handler);
   }, [showMonthMenu, setShowMonthMenu]);
 

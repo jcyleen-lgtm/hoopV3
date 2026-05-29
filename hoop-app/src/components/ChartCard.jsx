@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { memo, memo } from 'react'; // FIX: removed duplicate
+import React, { useState, memo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from 'recharts';
 import { TYPE, RADIUS, glassCard } from '../theme';
 
@@ -122,4 +123,4 @@ const ChartCard = ({ rows, colors, isDesktop, theme }) => {
   );
 };
 
-export default ChartCard;
+export default memo(ChartCard); // FIX: memo — skip re-render if props unchanged

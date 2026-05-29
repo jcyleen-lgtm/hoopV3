@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { NAVY, FONT, RADIUS, TYPE, glassCard } from '../theme';
 
 const MoonIcon   = ({ color }) => <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>;
@@ -142,4 +142,4 @@ const ProfilePage = ({ user, theme, colors, onToggleTheme, onLogout }) => {
   );
 };
 
-export default ProfilePage;
+export default memo(ProfilePage); // FIX: memo

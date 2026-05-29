@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { FONT } from '../theme';
 
 const HomeIcon    = ({ a, isLight }) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={a ? "white" : isLight ? "rgba(30,60,120,0.4)" : "rgba(181,212,244,0.4)"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
@@ -13,7 +13,8 @@ const TABS = [
   { key: 'profile',   label: 'Profile',   Icon: UserIcon    },
 ];
 
-const BottomNav = ({ page, onNavigate, theme }) => {
+// FIX: memo — BottomNav tidak perlu re-render kecuali page atau theme berubah
+const BottomNav = memo(({ page, onNavigate, theme }) => {
   const isLight = theme === 'light';
   return (
     <>
@@ -23,16 +24,17 @@ const BottomNav = ({ page, onNavigate, theme }) => {
         transform: 'translateX(-50%)',
         width: 'calc(100% - 32px)', maxWidth: '420px',
         height: '68px',
-        background: isLight ? 'rgba(255,255,255,0.65)' : 'rgba(4,8,16,0.85)',
-        backdropFilter: 'blur(32px)',
-        WebkitBackdropFilter: 'blur(32px)',
+        // FIX: dark mode pakai solid bg — hindari blur GPU overhead
+        background: isLight ? 'rgba(255,255,255,0.65)' : 'rgba(4,8,16,0.95)',
+        backdropFilter: isLight ? 'blur(32px)' : 'none',
+        WebkitBackdropFilter: isLight ? 'blur(32px)' : 'none',
         border: isLight ? '1px solid rgba(255,255,255,0.85)' : '1px solid rgba(59,130,196,0.15)',
         borderRadius: '999px',
         display: 'flex', alignItems: 'center',
         padding: '0 6px', zIndex: 500,
         boxShadow: isLight
           ? '0 8px 32px rgba(100,140,220,0.15), inset 0 1px 0 rgba(255,255,255,0.95), 0 0 20px rgba(59,130,196,0.06)'
-          : '0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 30px rgba(37,99,235,0.08)',
+          : '0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06)',
       }}>
         {TABS.map(({ key, label, Icon }) => {
           const active = page === key;
@@ -77,6 +79,6 @@ const BottomNav = ({ page, onNavigate, theme }) => {
       </nav>
     </>
   );
-};
+});
 
 export default BottomNav;
