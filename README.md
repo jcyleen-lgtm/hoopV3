@@ -1,58 +1,50 @@
-# Hoop V3 — Bug Fix Summary & Deploy Guide
+# Packer — Warehouse Intelligence App
 
-## Root Cause: Blank Screen After Login
-
-The blank screen after login was caused by **conflicting auth state** between `App.jsx` and `Scanner.jsx`.
-
-### What was happening:
-1. `App.jsx` managed `user` state and rendered `<Scanner>` when logged in ✓
-2. But `Scanner.jsx` *also* managed its own `user` state from `localStorage` — **independently**
-3. Scanner also had its own `page` state initialized to `'login'` when `user` was null
-4. Scanner had an internal login gate: `if (!user || page === 'login') return <LoginPage />`
-5. So even after App set the user and mounted Scanner, Scanner's internal `page` was still `'login'`, showing LoginPage inside Scanner
-
-**Fix:** `Scanner.jsx` now receives `user` and `onLogout` purely as props from `App.jsx`. No internal auth state, no login gate, no duplicate `LoginPage` import inside Scanner.
+Aplikasi warehouse scanning berbasis web (PWA) untuk tracking paket, monitoring staff, dan dashboard operasional real-time.
 
 ---
 
-## All Bugs Fixed
+## Tech Stack
 
-| File | Bug | Fix |
-|------|-----|-----|
-| `Scanner.jsx` | Managed own auth state, had internal login gate | Removed — receives `user`/`onLogout` as props |
-| `Scanner.jsx` | Imported `Moon`/`Sun` from lucide-react | Replaced with inline SVGs |
-| `App.jsx` | Passed `handleLogout` as `setUser` prop (misleading) | Renamed to `onLogout` |
-| `AdminDashboard.jsx` | Imported lucide icons (`RefreshCw`, `AlertCircle`, `Package`, `Users`, `Trophy`) | Replaced with inline SVGs |
-| `AdminDashboard.jsx` | Never passed `dateInpStyle`/`navyBtnStyle` to FilterBar | Now computed and passed |
-| `KpiCard.jsx` | Accepted lucide icon component as prop — caused hook crash | Changed to icon name string (`"package"`, `"users"`, `"trophy"`) with built-in inline SVGs |
-| `BottomNav.jsx` | Imported 4 lucide icons | Replaced with inline SVGs |
-| `Sidebar.jsx` | Imported 7 lucide icons | Replaced with inline SVGs |
-| `ProfilePage.jsx` | Imported `Moon`, `Sun`, `LogOut` from lucide | Replaced with inline SVGs |
-| `FilterBar.jsx` | Imported 6 lucide icons | Replaced with inline SVGs |
-| `ScannerCamera.jsx` | Imported 6 lucide icons | Replaced with inline SVGs |
-| `ProductList.jsx` | Used `axios` without importing it | Added `import axios from 'axios'` |
+| Layer | Tech |
+|---|---|
+| Frontend | React 18 + Vite |
+| Styling | Inline styles (CSS-in-JS) |
+| Backend | Google Apps Script |
+| Database | Google Sheets |
+| Deploy | Cloudflare Pages |
+| Scanner | html5-qrcode |
 
 ---
 
 ## Project Structure
 
 ```
-hoop/
+hoop-app/
 ├── index.html
 ├── package.json
-├── vite.config.js
-├── netlify.toml          ← SPA redirect rule for Netlify
+├── vite.config.js          ← Code splitting (chunks < 600KB)
+├── public/
+│   ├── manifest.json       ← PWA manifest (nama: Packer)
+│   ├── favicon.svg
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── logo-128.png        ← Logo inline (sharp, no blur)
+│   └── logo-96.png
 └── src/
     ├── main.jsx
-    ├── App.jsx           ← Auth owner (single source of truth)
-    ├── Scanner.jsx       ← Main shell, receives user as prop
+    ├── App.jsx             ← Auth owner + SplashScreen trigger
+    ├── Scanner.jsx         ← Main shell, receives user sebagai prop
     ├── AdminDashboard.jsx
-    ├── theme.js
-    ├── api.js
+    ├── theme.js            ← makeColors(theme) — dark/light tokens
+    ├── api.js              ← callScript() + fetchWithRetry (2x, 5s timeout)
+    ├── offlineQueue.js     ← Offline scan queue
     ├── components/
+    │   ├── SplashScreen.jsx   ← Splash screen 2-3 detik (soft pop animation)
     │   ├── LoginPage.jsx
-    │   ├── BottomNav.jsx
-    │   ├── Sidebar.jsx
+    │   ├── HomePage.jsx       ← KPI cards, staff ranking, live activity feed
+    │   ├── BottomNav.jsx      ← Mobile nav (memo, no blur dark mode)
+    │   ├── Sidebar.jsx        ← Desktop nav
     │   ├── ScannerCamera.jsx
     │   ├── ProductList.jsx
     │   ├── ProfilePage.jsx
@@ -66,31 +58,87 @@ hoop/
 
 ---
 
-## Deploy to Netlify
+## Fitur
 
-### Option A — Netlify CLI
-```bash
-npm install
-npm run build
-npx netlify deploy --prod --dir=dist
-```
+- **Splash Screen** — Logo + animasi soft pop 2-3 detik sebelum login
+- **Scanner Barcode** — Kamera real-time, auto-retry, offline queue
+- **Homepage Dashboard** — KPI cards, staff performance ranking, live activity feed, tombol refresh manual
+- **Admin Dashboard** — Rekapan harian/mingguan, filter by date/staff, chart
+- **Dark / Light Mode** — Toggle di sidebar & profile
+- **PWA** — Installable di Android/iOS, offline-capable
+- **Polling otomatis** — Data refresh tiap 60 detik di homepage
 
-### Option B — Netlify Git Integration
-1. Push this folder to a GitHub repo
-2. Go to [netlify.com](https://netlify.com) → New site from Git
-3. Build command: `npm run build`
-4. Publish directory: `dist`
-5. Deploy — the `netlify.toml` handles SPA routing automatically
+---
 
-### Environment note
-The Google Apps Script URL is hardcoded in multiple files. If you need to change it, search for:
-```
-AKfycbyrk91DSCO3exG4DzaS4BpNdX_sQvQT04o8LowrjnU
-```
-And replace across: `App.jsx`, `AdminDashboard.jsx`, `ProductList.jsx`, `hooks/useScanner.js`, `api.js`
+## Performance Fixes
 
-Consider moving it to a `.env` file:
+| Issue | Fix |
+|---|---|
+| Bundle 950KB | Code splitting via `vite.config.js` — react, recharts, scanner di-chunk terpisah |
+| Tap delay 300ms | `touch-action: manipulation` global di semua button |
+| Re-render berlebihan | `React.memo` di semua leaf components |
+| Sub-komponen di dalam parent | Dipindah ke luar — cegah unmount/remount tiap polling |
+| `makeColors` tiap render | `useMemo(() => makeColors(theme), [theme])` |
+| Resize listener spam | Debounce 100ms |
+| Logo blur | Pakai `/logo-128.png` dari public, bukan base64 inline |
+| Blur GPU overhead | Dark mode BottomNav: solid bg, no `backdropFilter` |
+| Scroll lag mobile | `passive: true` pada event listener |
+
+---
+
+## Environment
+
+Buat file `.env` di root `hoop-app/`:
+
 ```env
-VITE_SCRIPT_URL=https://script.google.com/macros/s/YOUR_ID/exec
+VITE_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 ```
-Then use `import.meta.env.VITE_SCRIPT_URL` in your files.
+
+---
+
+## Deploy — Cloudflare Pages
+
+1. Push repo ke GitHub
+2. Cloudflare Pages → Connect to Git → pilih repo
+3. **Build command:** `npm run build`
+4. **Build output directory:** `dist`
+5. **Root directory:** `hoop-app`
+6. Environment variable: `VITE_SCRIPT_URL` = URL GAS kamu
+7. Deploy — auto-deploy setiap `git push`
+
+```bash
+# Deploy manual
+git add . && git commit -m "..." && git push
+```
+
+---
+
+## Concurrent Usage
+
+| Layer | Kapasitas |
+|---|---|
+| Cloudflare CDN | ✅ Unlimited (static files) |
+| Google Apps Script | ⚠️ ~30 concurrent requests max |
+| Google Sheets | ⚠️ Rawan write conflict jika 10+ user scan bersamaan di detik yang sama |
+
+**Rekomendasi:** Untuk tim > 15 orang aktif scan bersamaan, pertimbangkan migrasi backend ke Supabase (PostgreSQL) untuk menghindari write conflict.
+
+---
+
+## Known Limitations
+
+- GAS execution timeout: 6 menit per request
+- Tidak ada real-time WebSocket — polling based (60 detik)
+- Google Sheets tidak support concurrent write locking
+
+---
+
+## Changelog
+
+| Versi | Perubahan |
+|---|---|
+| v3.0 | Rebranding Hoop → Packer, logo baru, splash screen |
+| v3.0 | Performance: memo, useMemo, debounce, touch-action, code splitting |
+| v3.0 | Homepage: refresh button, layout greeting baru (avatar top-right, refresh + LIVE bottom row) |
+| v3.0 | Dark mode: hapus backdropFilter blur di BottomNav |
+| v3.0 | Logo: ganti inline base64 → public path `/logo-128.png` |
