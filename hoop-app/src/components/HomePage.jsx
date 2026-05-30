@@ -114,50 +114,56 @@ const Greeting = memo(({ user, isDesktop, isLight, staffCount, onRefresh, refres
     : 'Overtime mode ON. The best teams never quit.';
 
   return (
-    <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: isDesktop ? '22px' : '18px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: '5px' }}>
-          {timeLabel},{' '}
-          <span style={{ color: '#60A5FA', textShadow: isLight ? 'none' : '0 0 16px rgba(96,165,250,0.5)' }}>
-            {user?.name || 'Admin'}
-          </span>
-          <span style={{ color: '#60A5FA', marginLeft: '2px' }}>.</span>
+    <div style={{ padding: isDesktop ? '28px 36px 0' : '52px 20px 0' }}>
+      {/* Row 1: Greeting text kiri + Avatar kanan */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: isDesktop ? '22px' : '18px', fontWeight: '700', color: isLight ? '#0D1F40' : '#fff', letterSpacing: '-0.3px', lineHeight: 1.2, marginBottom: '5px' }}>
+            {timeLabel},{' '}
+            <span style={{ color: '#60A5FA', textShadow: isLight ? 'none' : '0 0 16px rgba(96,165,250,0.5)' }}>
+              {user?.name || 'Admin'}
+            </span>
+            <span style={{ color: '#60A5FA', marginLeft: '2px' }}>.</span>
+          </div>
+          <div style={{
+            fontSize: isDesktop ? '13px' : '12px', fontWeight: '500',
+            color: isLight ? 'rgba(30,60,120,0.5)' : 'rgba(148,185,230,0.5)',
+            lineHeight: 1.4, marginBottom: '10px',
+            maxWidth: isDesktop ? '360px' : '240px',
+          }}>
+            {motivasi}
+          </div>
+          {/* dot staff aktif */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLight ? '#16A34A' : '#22C55E', boxShadow: isLight ? '0 0 10px rgba(22,163,74,0.8)' : '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)', flexShrink: 0 }} />
+            <span style={{ fontSize: '11px', color: isLight ? 'rgba(30,60,120,0.45)' : 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
+          </div>
         </div>
-        <div style={{
-          fontSize: isDesktop ? '13px' : '12px', fontWeight: '500',
-          color: isLight ? 'rgba(30,60,120,0.5)' : 'rgba(148,185,230,0.5)',
-          lineHeight: 1.4, marginBottom: '10px',
-          maxWidth: isDesktop ? '360px' : '240px',
-        }}>
-          {motivasi}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: isLight ? '#16A34A' : '#22C55E', boxShadow: isLight ? '0 0 10px rgba(22,163,74,0.8)' : '0 0 10px #22C55E, 0 0 20px rgba(34,197,94,0.4)', flexShrink: 0 }} />
-          <span style={{ fontSize: '11px', color: isLight ? 'rgba(30,60,120,0.45)' : 'rgba(148,185,230,0.4)' }}>{staffCount} staff aktif sekarang</span>
+        {/* Avatar kanan atas */}
+        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg,#1E3A6E,#3B82C4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', border: '1.5px solid rgba(59,130,196,0.35)', boxShadow: '0 0 16px rgba(59,130,196,0.3)', flexShrink: 0, marginLeft: '12px' }}>
+          {(user?.name || 'AD').slice(0, 2).toUpperCase()}
         </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0, marginLeft: '12px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: '20px', padding: '4px 10px', boxShadow: '0 0 14px rgba(239,68,68,0.12)' }}>
-          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
-          <span style={{ fontSize: '10px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>LIVE</span>
-        </div>
+
+      {/* Row 2: Refresh kiri + LIVE kanan */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '14px' }}>
         {/* Refresh button */}
         <button
           onClick={onRefresh}
           disabled={refreshing}
           style={{
             width: '38px', height: '38px', borderRadius: '50%',
-            background: refreshing ? 'rgba(59,130,196,0.15)' : 'rgba(59,130,196,0.12)',
-            border: '1.5px solid rgba(59,130,196,0.25)',
+            background: refreshing ? 'rgba(59,130,196,0.18)' : 'rgba(59,130,196,0.08)',
+            border: '1.5px solid rgba(59,130,196,0.22)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: refreshing ? 'not-allowed' : 'pointer',
-            boxShadow: refreshing ? '0 0 16px rgba(59,130,196,0.3)' : 'none',
+            boxShadow: refreshing ? '0 0 14px rgba(59,130,196,0.3)' : 'none',
             transition: 'all 0.2s ease',
           }}
         >
           <svg
             width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke={refreshing ? '#60A5FA' : 'rgba(96,165,250,0.7)'}
+            stroke={refreshing ? '#60A5FA' : 'rgba(96,165,250,0.6)'}
             strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
             style={{ animation: refreshing ? 'spin 0.7s linear infinite' : 'none' }}
           >
@@ -166,8 +172,10 @@ const Greeting = memo(({ user, isDesktop, isLight, staffCount, onRefresh, refres
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
         </button>
-        <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#1E3A6E,#3B82C4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', border: '1.5px solid rgba(59,130,196,0.35)', boxShadow: '0 0 16px rgba(59,130,196,0.3)' }}>
-          {(user?.name || 'AD').slice(0, 2).toUpperCase()}
+        {/* LIVE badge */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', borderRadius: '20px', padding: '4px 12px', boxShadow: '0 0 14px rgba(239,68,68,0.12)' }}>
+          <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
+          <span style={{ fontSize: '10px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>LIVE</span>
         </div>
       </div>
     </div>
