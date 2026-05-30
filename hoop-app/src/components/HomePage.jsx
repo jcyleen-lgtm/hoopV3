@@ -96,7 +96,7 @@ const DesktopGrid = ({ children }) => (
 
 // ── FIX: Sub-komponen dipindah ke LUAR HomePage agar tidak di-recreate tiap render ──
 
-const Greeting = memo(({ user, isDesktop, isLight, staffCount }) => {
+const Greeting = memo(({ user, isDesktop, isLight, staffCount, onRefresh, refreshing }) => {
   const hour = new Date().getHours();
   const timeLabel = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : hour < 20 ? 'Good evening' : 'Good night';
   const motivasi = hour < 5
@@ -141,6 +141,31 @@ const Greeting = memo(({ user, isDesktop, isLight, staffCount }) => {
           <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#EF4444', boxShadow: '0 0 6px #EF4444', animation: 'hpBlink 1.4s ease-in-out infinite' }} />
           <span style={{ fontSize: '10px', fontWeight: '700', color: '#F87171', letterSpacing: '0.1em' }}>LIVE</span>
         </div>
+        {/* Refresh button */}
+        <button
+          onClick={onRefresh}
+          disabled={refreshing}
+          style={{
+            width: '38px', height: '38px', borderRadius: '50%',
+            background: refreshing ? 'rgba(59,130,196,0.15)' : 'rgba(59,130,196,0.12)',
+            border: '1.5px solid rgba(59,130,196,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: refreshing ? 'not-allowed' : 'pointer',
+            boxShadow: refreshing ? '0 0 16px rgba(59,130,196,0.3)' : 'none',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <svg
+            width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke={refreshing ? '#60A5FA' : 'rgba(96,165,250,0.7)'}
+            strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+            style={{ animation: refreshing ? 'spin 0.7s linear infinite' : 'none' }}
+          >
+            <path d="M23 4v6h-6"/>
+            <path d="M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
         <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#1E3A6E,#3B82C4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '800', color: '#fff', border: '1.5px solid rgba(59,130,196,0.35)', boxShadow: '0 0 16px rgba(59,130,196,0.3)' }}>
           {(user?.name || 'AD').slice(0, 2).toUpperCase()}
         </div>
@@ -303,6 +328,7 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
   const [todayData, setTodayData] = useState(null);
   const [activity,  setActivity]  = useState([]);
   const [loading,   setLoading]   = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const pollRef = useRef(null);
 
   const fetchHome = useCallback(async (force = false) => {
@@ -325,6 +351,16 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
     } catch (_) {}
     setLoading(false);
   }, []);
+
+  const handleRefresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    const cacheKey = `home_today_${new Date().toDateString()}`;
+    delete GLOBAL_HOME_CACHE[cacheKey];
+    await fetchHome(true);
+    // Reset spinning setelah minimal 800ms biar terasa "berhasil"
+    setTimeout(() => setRefreshing(false), 800);
+  }, [fetchHome, refreshing]);
 
   useEffect(() => {
     fetchHome();
@@ -380,6 +416,7 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
     <>
       <style>{`
         @keyframes hpBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
       `}</style>
 
       {/* Ambient orbs */}
@@ -390,7 +427,7 @@ const HomePage = ({ user, isDesktop, onNavigate, theme = 'dark' }) => {
       </div>
 
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100%', paddingBottom: isDesktop ? '40px' : '100px' }}>
-        <Greeting user={user} isDesktop={isDesktop} isLight={isLight} staffCount={staffCount} />
+        <Greeting user={user} isDesktop={isDesktop} isLight={isLight} staffCount={staffCount} onRefresh={handleRefresh} refreshing={refreshing} />
         <div style={{ height: '1px', background: 'linear-gradient(90deg,transparent,rgba(59,130,196,0.15),transparent)', margin: '20px 20px 0' }} />
 
         {isDesktop ? (
