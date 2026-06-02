@@ -103,7 +103,7 @@ VITE_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
 3. **Build command:** `npm run build`
 4. **Build output directory:** `dist`
 5. **Root directory:** `hoop-app`
-6. Environment variable: `VITE_SCRIPT_URL` = URL GAS kamu
+6. Environment variable: `VITE_SCRIPT_URL` = URL GAS
 7. Deploy — auto-deploy setiap `git push`
 
 ```bash
