@@ -1,4 +1,3 @@
-// ── Offline Queue — persist scan ke localStorage saat offline ──
 const QUEUE_KEY = 'hoop_offline_queue';
 
 export const getQueue = () => {
