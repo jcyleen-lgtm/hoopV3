@@ -1,6 +1,5 @@
 const PROXY_URL = import.meta.env.VITE_SCRIPT_URL;
 
-// Fetch dengan retry otomatis (2x, linear backoff — lebih cepat dari exponential)
 const fetchWithRetry = async (url, retries = 2, delay = 500) => {
   for (let i = 0; i < retries; i++) {
     try {
@@ -16,12 +15,10 @@ const fetchWithRetry = async (url, retries = 2, delay = 500) => {
 
 export const callScript = (params) => {
   const p = { ...params };
-  // saveScan harus selalu fresh — tambah timestamp untuk bypass cache
   if (p.action === 'saveScan') p._t = Date.now();
   const qs  = new URLSearchParams(p).toString();
   const url = `${PROXY_URL}?${qs}`;
   return fetchWithRetry(url);
 };
 
-// Check apakah online
 export const isOnline = () => navigator.onLine;
